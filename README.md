@@ -3,7 +3,7 @@
 # Cloning the repo
 `git clone https://github.com/kitchen-assistant/api.git`
 
-# Deploying Fufillment
+# Deploying Fufillment (Firebase)
 Go [here](https://developers.google.com/actions/dialogflow/deploy-fulfillment) for a guide.
 
 `npm install -g firebase-tools`
@@ -11,11 +11,15 @@ Go [here](https://developers.google.com/actions/dialogflow/deploy-fulfillment) f
 `firebase login`
 
 `cd api/functions`
+
 `firebase list`
+
 `firebase use <PROJECT_ID>`
 
 `cd api/functions`
+
 `npm install`
+
 `firebase deploy --only functions`
 
 # Stack
