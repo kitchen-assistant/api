@@ -32,17 +32,18 @@ Go [here](https://developers.google.com/actions/dialogflow/deploy-fulfillment) f
 - [Github](https://github.com/kitchen-assistant)
 - [Zenhub](https://app.zenhub.com/workspace/o/kitchen-assistant/api/boards?repos=109394210,109394179,109862493,109733527)
 
-# Console Portals (TODO: @JessePeplinski - Add people to portals)
+# Console Portals
 You'll need to contact Jesse to add you to these portals.
 
-- [DialogFlow](https://console.dialogflow.com/api-client/#/login)
+- [DialogFlow Console](https://console.dialogflow.com/api-client/#/login)
 - [Actions on Google Console](https://console.actions.google.com/u/0/project/kitchen-assistant-8b1db/overview)
-- [Firebase - Functions](https://console.firebase.google.com/u/0/project/kitchen-assistant-8b1db/functions/list)
-- [Firebase - Realtime Database](https://console.firebase.google.com/u/0/project/kitchen-assistant-8b1db/database/data)
+- [Firebase Console - Functions](https://console.firebase.google.com/u/0/project/kitchen-assistant-8b1db/functions/list)
+- [Firebase Console - Realtime Database](https://console.firebase.google.com/u/0/project/kitchen-assistant-8b1db/database/data)
 
 # Communication 
 - [The #kitchen-assist channel on Hack Upstate's Slack](http://huslack.herokuapp.com/)
 
 # Helpful tools
 - [FireBase Admin - Visualize Database. Similar to MongoDB Compass](https://firebaseadmin.com/)
+
 Follow the instructions [here to get setup](http://docs.codefoxes.com/firebase-admin/).
