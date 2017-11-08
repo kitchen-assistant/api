@@ -1,5 +1,9 @@
 # api
 
+# Required Software Installed
+- [Git](https://git-scm.com/downloads)
+- [Nodejs](https://nodejs.org/en/download/)
+
 # Cloning the repo
 `git clone https://github.com/kitchen-assistant/api.git`
 
@@ -23,10 +27,11 @@ Go [here](https://developers.google.com/actions/dialogflow/deploy-fulfillment) f
 `firebase deploy --only functions`
 
 # Stack
-- [DialogFlow for Intents and  Entities](https://dialogflow.com/)
+- [Google Assistant / Google Home - Actions on Google](https://developers.google.com/actions/)
+- [DialogFlow for Intents and Entities](https://dialogflow.com/)
 - [Storage - Firebase RealTime Database](https://firebase.google.com/products/realtime-database/)
-- [Firebase Cloud Functions for Server-side](https://firebase.google.com/docs/functions/)
-- Javascript / nodejs
+- [Server - Firebase Cloud Functions](https://firebase.google.com/docs/functions/)
+- Language - Javascript / nodejs
 
 # Work Management and Issue Tracking
 - [Github](https://github.com/kitchen-assistant)
