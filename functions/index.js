@@ -49,16 +49,16 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         let responseToUser = {
           //googleRichResponse: googleRichResponse, // Optional, uncomment to enable
           //googleOutputContexts: ['weather', 2, { ['city']: 'rome' }], // Optional, uncomment to enable
-          speech: 'This message is from Dialogflow\'s Cloud Functions for Firebase editor!', // spoken response
-          displayText: 'This is from Dialogflow\'s Cloud Functions for Firebase editor! :-)' // displayed response
+          speech: 'DEFAULT RESPONSE. IF YOU ARE SEEING THIS, YOU ARE GETTING IT FROM THE CODE / ENDPOINT. HOORAY.', // spoken response
+          displayText: 'DEFAULT RESPONSE. IF YOU ARE SEEING THIS, YOU ARE GETTING IT FROM THE CODE / ENDPOINT. HOORAY.' // displayed response
         };
         sendGoogleResponse(responseToUser);
       } else {
         let responseToUser = {
           //richResponses: richResponses, // Optional, uncomment to enable
           //outputContexts: [{'name': 'weather', 'lifespan': 2, 'parameters': {'city': 'Rome'}}], // Optional, uncomment to enable
-          speech: 'This message is from Dialogflow\'s Cloud Functions for Firebase editor!', // spoken response
-          displayText: 'This is from Dialogflow\'s Cloud Functions for Firebase editor! :-)' // displayed response
+          speech: 'DEFAULT RESPONSE. IF YOU ARE SEEING THIS, YOU ARE GETTING IT FROM THE CODE / ENDPOINT. HOORAY.', // spoken response
+          displayText: 'DEFAULT RESPONSE. IF YOU ARE SEEING THIS, YOU ARE GETTING IT FROM THE CODE / ENDPOINT. HOORAY.' // displayed response
         };
         sendResponse(responseToUser);
       }
