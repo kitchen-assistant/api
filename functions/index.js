@@ -96,10 +96,14 @@ exports.createUserAccount = functions.auth.user().onCreate(event => {
 });
 
 // When a user is deleted, set flag in the db
+// Thanks to https://www.youtube.com/watch?v=pADTJA3BoxE&t=187s
 exports.cleanUpUserData = functions.auth.user().onDelete(event => {
+    
+    // get values from when user signed in through oauth
     const uid = event.data.uid;
     const userRef = dbref.child(`/users/${uid}`);
 
+    // set isDeleted flag in the database when a user deletes their account
     return userRef.update({
         isDeleted: true
     })
