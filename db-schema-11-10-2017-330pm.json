@@ -1,0 +1,39 @@
+{
+  "groceryList" : {
+    "chicken" : {
+      "price" : 8.99
+    },
+    "eggs" : {
+      "price" : 2.99
+    }
+  },
+  "locations" : {
+    "fridge" : {
+      "items" : {
+        "butter" : {
+          "expiration_date" : "12/12/2022",
+          "food-group" : "dairy",
+          "other_field" : "datadatadata"
+        },
+        "milk" : {
+          "expiration_date" : "12/12/2022",
+          "food-group" : "dairy",
+          "other_field" : "datadatadata"
+        }
+      }
+    },
+    "pantry" : {
+      "items" : {
+        "bread" : {
+          "expiration_date" : "08/08/2020"
+        }
+      }
+    }
+  },
+  "users" : {
+    "zoOL16jaRYaLA4k4wSLRdHj4GWh1" : {
+      "email" : "test@test.com",
+      "isDeleted" : true
+    }
+  }
+}
