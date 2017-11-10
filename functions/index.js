@@ -1,5 +1,8 @@
 'use strict';
 
+// modeled after the code here https://github.com/firebase/assistant-codelab
+// and tutorial here https://codelabs.developers.google.com/codelabs/assistant-codelab/index.html?index=..%2F..%2Findex#0
+
 // Debug, only turn this on if you want ALL the debug messages
 // process.env.DEBUG = 'actions-on-google:*';
 
@@ -12,6 +15,9 @@ const functions = require('firebase-functions');
 // Firebase Admin
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
+
+// Database access
+const dbref = admin.database().ref(); // can also specify a path to the db here
 
 // Dialogflow Intent Names
 const WELCOME_INTENT = 'input.welcome';
@@ -34,6 +40,13 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     actionMap.set(WELCOME_INTENT, welcome);
     actionMap.set(DEFAULT_FALL_BACK_INTENT, defaultFallback);
     assistant.handleRequest(actionMap);
+
+    function boilerPlateIntentHandler(assistant) {
+        // Get the prior question
+        // Define parameters
+        // Set the context
+        // Ask the user something
+    }
 
     // Handle the welcome intent
     function welcome(assistant) {
@@ -63,4 +76,31 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         // Ask user something
         assistant.ask(speech);
     }
+});
+
+// Handle new user auth events
+// Thanks to https://www.youtube.com/watch?v=pADTJA3BoxE&t=187s
+exports.createUserAccount = functions.auth.user().onCreate(event => {
+    
+    // get values from when user signed in through oauth
+    const uid = event.data.uid;
+    const email = event.data.email; // some users might not have an email
+
+    // database ref to path
+    const newUserRef = dbref.child(`/users/${uid}`);
+
+    // set name and email in the db
+    return newUserRef.set({
+        email: email
+    })
+});
+
+// When a user is deleted, set flag in the db
+exports.cleanUpUserData = functions.auth.user().onDelete(event => {
+    const uid = event.data.uid;
+    const userRef = dbref.child(`/users/${uid}`);
+
+    return userRef.update({
+        isDeleted: true
+    })
 });
