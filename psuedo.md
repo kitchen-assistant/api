@@ -1,5 +1,6 @@
 # Psuedo for project
 
+```javascript
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
 
     // TODO: Update all these itents in DialogFlow too
@@ -38,3 +39,4 @@ exports.itemAddedToDB = functions.database/ref('/locations/{location}/items/{ite
         // Return promises for each case. 
     });
 }
+```
