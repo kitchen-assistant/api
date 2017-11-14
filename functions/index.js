@@ -19,8 +19,7 @@ admin.initializeApp(functions.config().firebase);
 // Database access
 const dbref = admin.database().ref(); // can also specify a path to the db here
 
-// Dialogflow Intent Names
-
+// DIALOGFLOW INTENT NAMES
 // Welcome and fallback
 const WELCOME_INTENT = 'input.welcome';
 const DEFAULT_FALL_BACK_INTENT = 'input.unknown';
@@ -33,19 +32,30 @@ const LOCATION_UPDATE = 'location.update';
 
 // Items
 const ITEM_ADD = 'item.add';
+const ITEM_LIST = 'item.list';
+const ITEM_REMOVE = 'item.remove';
+const ITEM_UPDATE = 'item.update';
 
 // Expiration
 const EXPIRATION_ADD = 'expiration.add';
+const EXPIRATION_LIST = 'expiration.list';
+const EXPIRATION_REMOVE = 'expiration.remove';
+const EXPIRATION_UPDATE = 'expiration.update';
 
 // Cart / Shopping List 
 const CART_ADD = 'cart.add';
+const CART_LIST = 'cart.list';
+const CART_REMOVE = 'cart.remove';
+const CART_UPDATE = 'cart.update';
+const CART_PURCHASE = 'cart.purchase';
 
-// Contexts
+// DIALOGFLOW CONTEXTS
 // TODO
 
-// Context Parameters
+// DIALOGFLOW CONTEXT PARAMETERS
 // TODO
 
+// TODO: Create multiple cloud functions for each one of these functions? Or at least structure project properly
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
     console.log('Request headers: ' + JSON.stringify(request.headers));
     console.log('Request body: ' + JSON.stringify(request.body));
@@ -67,12 +77,22 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     // Items
     actionMap.set(ITEM_ADD, add);
+    actionMap.set(ITEM_LIST, list);
+    actionMap.set(ITEM_REMOVE, remove);
+    actionMap.set(ITEM_UPDATE, update);
 
     // Expiration Dates
     actionMap.set(EXPIRATION_ADD, add);
+    actionMap.set(EXPIRATION_LIST, list);
+    actionMap.set(EXPIRATION_REMOVE, remove);
+    actionMap.set(EXPIRATION_UPDATE, update);
 
     // Cart 
     actionMap.set(CART_ADD, add);
+    actionMap.set(CART_LIST, list);
+    actionMap.set(CART_REMOVE, remove);
+    actionMap.set(CART_UPDATE, update);
+    actionMap.set(CART_PURCHASE, purchase);
     
     assistant.handleRequest(actionMap);
 
@@ -101,7 +121,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         const intent = assistant.getIntent(); // get the intent given by the user
         let text; // text to be returned to the user
 
-        // TODO: Logic for these cases
+        // TODO: Logic for these cases -- get from psuedo (check if it exists, then add to DB)
         switch (intent) {
             case LOCATION_ADD:
                 text = 'LOCATION_ADD from webook';
@@ -132,9 +152,22 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         const intent = assistant.getIntent(); // get the intent given by the user
         let text; // text to be returned to the user
 
+        // TODO: Logic for these cases -- get from psuedo (check if it exists, then add to DB)
         switch (intent) {
             case LOCATION_LIST:
                 text = 'LOCATION_LIST from webook';
+                break;
+            
+            case ITEM_LIST:
+                text = 'ITEM_LIST from webook';
+                break;
+
+            case EXPIRATION_LIST:
+                text = 'EXPIRATION_LIST from webook';
+                break;
+
+            case CART_LIST:
+                text = 'CART_LIST from webook';
                 break;
 
             default:
@@ -154,7 +187,19 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             case LOCATION_REMOVE:
                 text = 'LOCATION_REMOVE from webook';
                 break;
+            
+            case ITEM_REMOVE:
+                text = 'ITEM_REMOVE from webook';
+                break;
 
+            case EXPIRATION_REMOVE:
+                text = 'EXPIRATION_REMOVE from webook';
+                break;
+
+            case CART_REMOVE:
+                text = 'CART_REMOVE from webook';
+                break;
+                
             default:
                 text = 'Hmm, I was not able to remove that. Can you try again?';
                 break;
@@ -172,6 +217,18 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             case LOCATION_UPDATE:
                 text = 'LOCATION_UPDATE from webook';
                 break;
+            
+            case ITEM_UPDATE:
+                text = 'ITEM_UPDATE from webook';
+                break;
+
+            case EXPIRATION_UPDATE:
+                text = 'EXPIRATION_UPDATE from webook';
+                break;
+
+            case CART_UPDATE:
+                text = 'CART_UPDATE from webook';
+                break;
 
             default:
                 text = 'Hmm, I was not able to update that. Can you try again?';
@@ -180,6 +237,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
         const speech = text; // output to dialogflow
         assistant.ask(speech); // ask user something
+    }
+
+    function purchase(assistant) {
+        const intent = assistant.getIntent(); // get the intent given by the user
+        let text; // text to be returned to the user
+
+        const speech = text;
+        assistant.ask(speech);
     }
 
 });
