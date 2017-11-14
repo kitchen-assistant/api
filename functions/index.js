@@ -27,6 +27,9 @@ const DEFAULT_FALL_BACK_INTENT = 'input.unknown';
 
 // Locations
 const LOCATION_ADD = 'location.add';
+const LOCATION_LIST = 'location.list';
+const LOCATION_REMOVE = 'location.remove';
+const LOCATION_UPDATE = 'location.update';
 
 // Items
 const ITEM_ADD = 'item.add';
@@ -58,6 +61,9 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     // Locations
     actionMap.set(LOCATION_ADD, add);
+    actionMap.set(LOCATION_LIST, list);
+    actionMap.set(LOCATION_REMOVE, remove);
+    actionMap.set(LOCATION_UPDATE, update);
 
     // Items
     actionMap.set(ITEM_ADD, add);
@@ -92,11 +98,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     }
 
     function add(assistant) {
+        const intent = assistant.getIntent(); // get the intent given by the user
+        let text; // text to be returned to the user
 
-        // get the intent given by the user
-        const intent = assistant.getIntent();
-        let text;
-
+        // TODO: Logic for these cases
         switch (intent) {
             case LOCATION_ADD:
                 text = 'LOCATION_ADD from webook';
@@ -119,6 +124,60 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 break;
         }
         
+        const speech = text; // output to dialogflow
+        assistant.ask(speech); // ask user something
+    }
+
+    function list(assistant) {
+        const intent = assistant.getIntent(); // get the intent given by the user
+        let text; // text to be returned to the user
+
+        switch (intent) {
+            case LOCATION_LIST:
+                text = 'LOCATION_LIST from webook';
+                break;
+
+            default:
+                text = 'Hmm, I was not able to list that. Can you try again?';
+                break;
+        }
+
+        const speech = text; // output to dialogflow
+        assistant.ask(speech); // ask user something
+    }
+
+    function remove(assistant) {
+        const intent = assistant.getIntent(); // get the intent given by the user
+        let text; // text to be returned to the user
+
+        switch (intent) {
+            case LOCATION_REMOVE:
+                text = 'LOCATION_REMOVE from webook';
+                break;
+
+            default:
+                text = 'Hmm, I was not able to remove that. Can you try again?';
+                break;
+        }
+
+        const speech = text; // output to dialogflow
+        assistant.ask(speech); // ask user something
+    }
+
+    function update(assistant) {
+        const intent = assistant.getIntent(); // get the intent given by the user
+        let text; // text to be returned to the user
+
+        switch (intent) {
+            case LOCATION_UPDATE:
+                text = 'LOCATION_UPDATE from webook';
+                break;
+
+            default:
+                text = 'Hmm, I was not able to update that. Can you try again?';
+                break;
+        }
+
         const speech = text; // output to dialogflow
         assistant.ask(speech); // ask user something
     }
