@@ -22,6 +22,7 @@ const dbref = admin.database().ref(); // can also specify a path to the db here
 // Dialogflow Intent Names
 const WELCOME_INTENT = 'input.welcome';
 const DEFAULT_FALL_BACK_INTENT = 'input.unknown';
+const LOCATION_ADD = 'location.add';
 
 // Contexts
 // TODO
@@ -39,6 +40,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     let actionMap = new Map();
     actionMap.set(WELCOME_INTENT, welcome);
     actionMap.set(DEFAULT_FALL_BACK_INTENT, defaultFallback);
+    actionMap.set(LOCATION_ADD, add);
     assistant.handleRequest(actionMap);
 
     function boilerPlateIntentHandler(assistant) {
@@ -76,6 +78,24 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         // Ask user something
         assistant.ask(speech);
     }
+
+    function add(assistant) {
+        
+        // CASE ITEM
+        
+        // CASE LOCATION
+
+        // CASE CART / GROCERY LIST
+
+        // CASE EXPIRATION
+
+        const text = "Adding location from webhook!";
+
+        const speech = text;
+
+        assistant.ask(speech);
+    }
+
 });
 
 // Handle new user auth events
