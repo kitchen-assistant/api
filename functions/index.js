@@ -20,9 +20,22 @@ admin.initializeApp(functions.config().firebase);
 const dbref = admin.database().ref(); // can also specify a path to the db here
 
 // Dialogflow Intent Names
+
+// Welcome and fallback
 const WELCOME_INTENT = 'input.welcome';
 const DEFAULT_FALL_BACK_INTENT = 'input.unknown';
+
+// Locations
 const LOCATION_ADD = 'location.add';
+
+// Items
+const ITEM_ADD = 'item.add';
+
+// Expiration
+const EXPIRATION_ADD = 'expiration.add';
+
+// Cart / Shopping List 
+const CART_ADD = 'cart.add';
 
 // Contexts
 // TODO
@@ -38,9 +51,23 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     // Map intents to functions to handle them
     let actionMap = new Map();
+
+    // Welcome and fallback intents 
     actionMap.set(WELCOME_INTENT, welcome);
     actionMap.set(DEFAULT_FALL_BACK_INTENT, defaultFallback);
+
+    // Locations
     actionMap.set(LOCATION_ADD, add);
+
+    // Items
+    actionMap.set(ITEM_ADD, add);
+
+    // Expiration Dates
+    actionMap.set(EXPIRATION_ADD, add);
+
+    // Cart 
+    actionMap.set(CART_ADD, add);
+    
     assistant.handleRequest(actionMap);
 
     function boilerPlateIntentHandler(assistant) {
@@ -52,48 +79,48 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     // Handle the welcome intent
     function welcome(assistant) {
-
         const text = "Welcome! If you are seeing this, that means our own code is working and you are calling the welcome function. Hooray!";
-
-        // Output to firebase console
-        // console.log(text);
-
-        // Output to DialogFlow / user
-        const speech = text;
-
-        // Ask user something
-        assistant.ask(speech);
+        const speech = text; // Output to DialogFlow
+        assistant.ask(speech); // Ask user something
     }
 
     // Handle the intent
     function defaultFallback(assistant) {
         const text = "Default fallback! If you are seeing this, that means our own code is working and you are calling the default fallback function. Hooray!";
-
-        // Output to firebase console
-        // console.log(text);
-
-        // Output to DialogFlow / user
-        const speech = text;
-
-        // Ask user something
-        assistant.ask(speech);
+        const speech = text;  // Output to DialogFlow
+        assistant.ask(speech); // Ask user something
     }
 
     function add(assistant) {
+
+        // get the intent given by the user
+        const intent = assistant.getIntent();
+        let text;
+
+        switch (intent) {
+            case LOCATION_ADD:
+                text = 'LOCATION_ADD from webook';
+                break;
+
+            case ITEM_ADD:
+                text = 'ITEM_ADD from webook';
+                break;
+
+            case EXPIRATION_ADD:
+                text = 'EXPIRATION_ADD from webook';
+                break;
+
+            case CART_ADD:
+                text = 'CART_ADD from webook';
+                break;
+
+            default:
+                text = 'Hmm, I was not able to add that. Can you try again?';
+                break;
+        }
         
-        // CASE ITEM
-        
-        // CASE LOCATION
-
-        // CASE CART / GROCERY LIST
-
-        // CASE EXPIRATION
-
-        const text = "Adding location from webhook!";
-
-        const speech = text;
-
-        assistant.ask(speech);
+        const speech = text; // output to dialogflow
+        assistant.ask(speech); // ask user something
     }
 
 });
