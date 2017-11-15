@@ -24,7 +24,7 @@
 
 `firebase init`
 
-1. Only select the `Functions: COnfigure and deploy Cloud functions` item with the **spacebar**, then hit enter.
+1. Only select the `Functions: Configure and deploy Cloud functions` item with the **spacebar**, then hit enter.
 2. Select the `kitchen-assist` project. 
 3. Follow the rest of the prompts.
 4. A `/functions` folder should be created with a boilerplate `index.js` file within it along with some config files.
@@ -50,28 +50,24 @@ Now we just have to run `firebase deploy --only functions` from now on.
 Note that in our case, we didn't actually get an endpoint through the CLI because we deployed it using the inline editor and continued to use that endpoint.
 
 # Running the project locally
-
-You'll need to install ngrok to create a tunnel from the internet into your development machine.
-
-`brew cask install ngrok`
-
-Serve the firebase project locally
+## Serving the firebase project locally
 
 `firebase serve --only functions`
 
 You'll get something like this in the CLI `http://localhost:5000/kitchen-assistant-8b1db/us-central1/dialogflowFirebaseFulfillment`
 
-In a new shell, run `ngrok http 5000`
+## Install ngrok
 
-Then copy the ***https*** domain you are given, i.e.: `https://<something>.ngrok.io`
+You'll need to install ngrok to create a tunnel from the internet into your development machine.
 
-Then go to `https://<something>.ngrok.io/kitchen-assistant-8b1db/us-central1/dialogflowFirebaseFulfillment`
+On mac you can run `brew cask install ngrok` or download it from [here](https://ngrok.com/).
 
-You'll get something like "Action Error: no matching intent handler for: null". 
-
-Finally, copy the `https://<something>.ngrok.io/kitchen-assistant-8b1db/us-central1/dialogflowFirebaseFulfillment` into the Dialogflow fufillment webhook. 
-
-When you start executing requests, you'll see the logs appear in the console that you served firebase.
+## Starting ngrok
+1. Open a new shell and run `ngrok http 5000`. You'll now have one shell serving firebase, and the other running ngrok.
+2. Copy the ***https*** domain you are given, i.e.: `https://<something>.ngrok.io`
+3. Go to `https://<something>.ngrok.io/kitchen-assistant-8b1db/us-central1/dialogflowFirebaseFulfillment`. You'll get something like "Action Error: no matching intent handler for: null". If you aren't getting this, you messed something up.
+4. Copy the `https://<something>.ngrok.io/kitchen-assistant-8b1db/us-central1/dialogflowFirebaseFulfillment` and paste it into the Dialogflow fufillment webhook. You'll have to change this back to the original webhook when you want to use your production cloud functions.
+5. When you start executing requests (using Dialogflow), you'll see the logs appear in the console that you served firebase.
 
 ## Deploying after cloning this repo for the first time
 I'm still not sure the best way to do this. When setting up the project, it's probably best for Firebase to generate the `/functions` and `index.js`. 
