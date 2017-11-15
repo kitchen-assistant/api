@@ -3,6 +3,8 @@
 // modeled after the code here https://github.com/firebase/assistant-codelab
 // and tutorial here https://codelabs.developers.google.com/codelabs/assistant-codelab/index.html?index=..%2F..%2Findex#0
 
+// this is also helpful - https://developers.google.com/actions/dialogflow/fulfillment
+
 // Debug, only turn this on if you want ALL the debug messages
 // process.env.DEBUG = 'actions-on-google:*';
 
@@ -120,10 +122,26 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     function add(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
         let text; // text to be returned to the user
-        // TODO @ JESSE: Get what the user said 
+        console.log("add");
+
+        let userSpeech = assistant.getRawInput(); // Get exactly what the user said 
+        console.log('The user said: ' + userSpeech);
+
+        // TODO @ JESSE: Get the actual thing to be added
+        // let tryToGetArgument = assistant.getArgument(intent);
+        // console.log('Extracting from argument: ' + tryToGetArgument);
+
+        // Testing contexts...
+        const ADD_CONTEXT = 'add';
+        assistant.setContext(ADD_CONTEXT);
+
+        let testContext = assistant.getContext(ADD_CONTEXT);
+        console.log('trying to spit out context...' + testContext);
 
         switch (intent) {
             case LOCATION_ADD:
+                console.log("adding location");
+
                 text = 'LOCATION_ADD from webook';
                 // TODO: Move below logic outside the switch statement in a exists function
 
@@ -135,6 +153,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 break;
 
             case ITEM_ADD:
+                console.log("adding item");
                 text = 'ITEM_ADD from webook';
                 // IF (The item doesn't exist)
                     // Tell user item has been added
@@ -145,14 +164,17 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 break;
 
             case EXPIRATION_ADD:
+                console.log("adding expiration");
                 text = 'EXPIRATION_ADD from webook';
                 break;
 
             case CART_ADD:
+                console.log("adding to cart");
                 text = 'CART_ADD from webook';
                 break;
 
             default:
+                console.log("adding default");
                 text = 'Hmm, I was not able to add that. Can you try again?';
                 break;
         }
@@ -164,6 +186,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     function list(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
         let text; // text to be returned to the user
+        console.log("list");
 
         switch (intent) {
             case LOCATION_LIST:
@@ -194,6 +217,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     function remove(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
         let text; // text to be returned to the user
+        console.log("remove");
 
         switch (intent) {
             case LOCATION_REMOVE:
@@ -229,6 +253,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     function update(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
         let text; // text to be returned to the user
+        console.log("update");
 
         switch (intent) {
             case LOCATION_UPDATE:
@@ -264,6 +289,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     function purchase(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
         let text; // text to be returned to the user
+        console.log("purchase");
 
         // TODO: Connect to Google Transactions API
 
