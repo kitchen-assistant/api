@@ -49,6 +49,30 @@ Now we just have to run `firebase deploy --only functions` from now on.
 
 Note that in our case, we didn't actually get an endpoint through the CLI because we deployed it using the inline editor and continued to use that endpoint.
 
+# Running the project locally
+
+You'll need to install ngrok to create a tunnel from the internet into your development machine.
+
+`brew cask install ngrok`
+
+Serve the firebase project locally
+
+`firebase serve --only functions`
+
+You'll get something like this in the CLI `http://localhost:5000/kitchen-assistant-8b1db/us-central1/dialogflowFirebaseFulfillment`
+
+In a new shell, run `ngrok http 5000`
+
+Then copy the ***https*** domain you are given, i.e.: `https://<something>.ngrok.io`
+
+Then go to `https://<something>.ngrok.io/kitchen-assistant-8b1db/us-central1/dialogflowFirebaseFulfillment`
+
+You'll get something like "Action Error: no matching intent handler for: null". 
+
+Finally, copy the `https://<something>.ngrok.io/kitchen-assistant-8b1db/us-central1/dialogflowFirebaseFulfillment` into the Dialogflow fufillment webhook. 
+
+When you start executing requests, you'll see the logs appear in the console that you served firebase.
+
 ## Deploying after cloning this repo for the first time
 I'm still not sure the best way to do this. When setting up the project, it's probably best for Firebase to generate the `/functions` and `index.js`. 
 
