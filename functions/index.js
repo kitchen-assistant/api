@@ -120,15 +120,28 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     function add(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
         let text; // text to be returned to the user
+        // TODO @ JESSE: Get what the user said 
 
-        // TODO: Logic for these cases -- get from psuedo (check if it exists, then add to DB)
         switch (intent) {
             case LOCATION_ADD:
                 text = 'LOCATION_ADD from webook';
+                // TODO: Move below logic outside the switch statement in a exists function
+
+                // IF (The location doesn't exist)
+                    // Tell user location has been added
+                    // TODO @ ZACH: Query to add to database
+                // ELSE (location exists)
+                    // Tell user location exists already
                 break;
 
             case ITEM_ADD:
                 text = 'ITEM_ADD from webook';
+                // IF (The item doesn't exist)
+                    // Tell user item has been added
+                    // TODO @ ZACH: Make API call to populate fields on the item
+                    // TODO @ ZACH: Query to add to database
+                // ELSE (item exists)
+                    // Tell user item exists already
                 break;
 
             case EXPIRATION_ADD:
@@ -152,7 +165,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         const intent = assistant.getIntent(); // get the intent given by the user
         let text; // text to be returned to the user
 
-        // TODO: Logic for these cases -- get from psuedo (check if it exists, then add to DB)
         switch (intent) {
             case LOCATION_LIST:
                 text = 'LOCATION_LIST from webook';
@@ -185,6 +197,11 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
         switch (intent) {
             case LOCATION_REMOVE:
+                // IF (The location doesn't exists)
+                    // Tell user location doesn't exist to delete
+                // ELSE (location exists)
+                    // Tell user location has been deleted
+                    // TODO @ ZACH: Query to delete item from DB
                 text = 'LOCATION_REMOVE from webook';
                 break;
             
@@ -215,6 +232,11 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
         switch (intent) {
             case LOCATION_UPDATE:
+                // IF (The location doesn't exist)
+                    // Tell user location doesn't exist, and ask if they would like to add it.
+                // ELSE (location exists)
+                    // Tell user the location has been updated
+                    // TODO @ ZACH: Query to update database
                 text = 'LOCATION_UPDATE from webook';
                 break;
             
@@ -243,11 +265,15 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         const intent = assistant.getIntent(); // get the intent given by the user
         let text; // text to be returned to the user
 
+        // TODO: Connect to Google Transactions API
+
         const speech = text;
         assistant.ask(speech);
     }
 
 });
+
+// TODO @ JESSE: Update these functions to be consistent with database schema 
 
 // Handle new user auth events
 // Thanks to https://www.youtube.com/watch?v=pADTJA3BoxE&t=187s
