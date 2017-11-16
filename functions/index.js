@@ -53,6 +53,9 @@ const CART_PURCHASE = 'cart.purchase';
 
 // DIALOGFLOW CONTEXTS
 // TODO
+const ADD_CONTEXT = 'add';
+
+const LOCATION_CONTEXT = 'location';
 
 // DIALOGFLOW CONTEXT PARAMETERS
 // TODO
@@ -128,23 +131,40 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         console.log('The user said: ' + userSpeech);
 
         // TODO @ JESSE: Get the actual thing to be added
+        // I need to extract the parameter values
+        // https://dialogflow.com/docs/actions-and-parameters#original
         // let tryToGetArgument = assistant.getArgument(intent);
         // console.log('Extracting from argument: ' + tryToGetArgument);
 
-        // Testing contexts...
-        const ADD_CONTEXT = 'add';
+        // Set context
+        console.log("setting add context");
         assistant.setContext(ADD_CONTEXT);
 
-        let testContext = assistant.getContext(ADD_CONTEXT);
-        console.log('trying to spit out context...' + testContext);
+        // let testContext = assistant.getContext(ADD_CONTEXT);
+        // console.log('trying to spit out context...' + testContext);
+
 
         switch (intent) {
             case LOCATION_ADD:
                 console.log("adding location");
 
-                text = 'LOCATION_ADD from webook';
-                // TODO: Move below logic outside the switch statement in a exists function
+                console.log("setting location context");
+                assistant.setContext(LOCATION_CONTEXT);
 
+                // for debugging
+                // console.log(JSON.stringify(assistant.getContext(ADD_CONTEXT).parameters, null, 4));
+
+                // for debugging
+                // console.log(JSON.stringify(assistant.getContext(LOCATION_CONTEXT).parameters, null, 4));
+
+                // get argument from the context; i.e. parameter --> value; locations --> fridge
+                const thingToAdd = assistant.getArgument('locations');
+
+                console.log("CAN WE GET THE THING TO ADD????? LETS SEE: " + thingToAdd);
+
+                text = 'LOCATION_ADD from webook';
+
+                // TODO: Move below logic outside the switch statement in a exists function
                 // IF (The location doesn't exist)
                     // Tell user location has been added
                     // TODO @ ZACH: Query to add to database
