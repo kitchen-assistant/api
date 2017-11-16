@@ -52,7 +52,6 @@ const CART_UPDATE = 'cart.update';
 const CART_PURCHASE = 'cart.purchase';
 
 // DIALOGFLOW CONTEXTS
-// TODO
 const ADD_CONTEXT = 'add';
 const LIST_CONTEXT = 'list';
 const REMOVE_CONTEXT = 'remove';
@@ -115,18 +114,28 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         // Ask the user something
     }
 
-    // Handle the welcome intent
+    /**
+     * Handle the welcome intent
+     * @param {*} assistant 
+     */
     function welcome(assistant) {
         const speech = "Welcome! If you are seeing this, that means our own code is working and you are calling the welcome function. Hooray!";
         assistant.ask(speech); // Ask user something
     }
 
-    // Handle the intent
+    /**
+     * Handle fallback if the user says something that is unknown
+     * @param {*} assistant 
+     */
     function defaultFallback(assistant) {
         const speech = "Default fallback! If you are seeing this, that means our own code is working and you are calling the default fallback function. Hooray!";
         assistant.ask(speech); // Ask user something
     }
 
+    /**
+     * Add a location, item, expiration date, or something to your cart
+     * @param {*} assistant 
+     */
     function add(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
         let speech; // text to be returned to the user
@@ -178,7 +187,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             case EXPIRATION_ADD:
                 console.log("adding expiration");
                 assistant.setContext(EXPIRATION_CONTEXT);
-                text = 'EXPIRATION_ADD from webook';
+                speech = 'EXPIRATION_ADD from webook';
                 break;
 
             case CART_ADD:
@@ -196,6 +205,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         assistant.ask(speech); // ask user something
     }
 
+    /**
+     * List your locations, items, expiration dates, or items in your cart
+     * @param {*} assistant 
+     */
     function list(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
         let speech; // text to be returned to the user
@@ -236,6 +249,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         assistant.ask(speech); // ask user something
     }
 
+    /**
+     * Remove a location, item, expiration date, or item in your cart
+     * @param {*} assistant 
+     */
     function remove(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
         let speech; // text to be returned to the user
@@ -283,6 +300,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         assistant.ask(speech); // ask user something
     }
 
+    /**
+     * Update a location, item, expiration date, or item in your cart
+     * @param {*} assistant 
+     */    
     function update(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
         let speech; // text to be returned to the user
@@ -321,13 +342,17 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 break;
 
             default:
-            speech = 'Hmm, I was not able to update that. Can you try again?';
+                speech = 'Hmm, I was not able to update that. Can you try again?';
                 break;
         }
 
         assistant.ask(speech); // ask user something
     }
 
+    /**
+     * Purchase items in your cart
+     * @param {*} assistant 
+     */
     function purchase(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
         let speech; // text to be returned to the user
@@ -335,7 +360,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
         assistant.setContext(PURCHASE_CONTEXT);
 
-        // TODO: Connect to Google Transactions API
+        // TODO @ Zach: Connect to Google Transactions API
         
         assistant.ask(speech);
     }
