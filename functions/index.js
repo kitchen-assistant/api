@@ -159,9 +159,9 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 // extract the parameter values; i.e. parameter --> value; locations --> fridge
                 // This now extracts it as a list in dialogflow! woo.
                 // https://dialogflow.com/docs/actions-and-parameters
-                const thingToAdd = assistant.getArgument(LOCATION_CONTEXT);
+                const locationToAdd = assistant.getArgument(LOCATION_CONTEXT);
 
-                speech = `Okay, I will add ${thingToAdd} to your list of locations.`;
+                speech = `Okay, I will add ${locationToAdd} to your list of locations.`;
                 console.log(speech);
 
                 // TODO: Move below logic outside the switch statement in a exists function
@@ -175,7 +175,23 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             case ITEM_ADD:
                 console.log("adding item and setting item context");
                 assistant.setContext(ITEM_CONTEXT);
-                speech = 'ITEM_ADD from webook';
+
+                // maybe add these all outside the cases? not sure...
+                const itemsToAdd = assistant.getArgument(ITEM_CONTEXT);
+                const locationToAddWithItem = assistant.getArgument(LOCATION_CONTEXT);
+
+                console.log("Item to add: " + itemsToAdd);
+                console.log("Location to add: " + locationToAddWithItem);
+
+                // IF(The user hasn't specified where to store items, ie; 'Add milk', ask them where to store the items )
+                if (locationToAddWithItem == null) {
+                    assistant.ask(`[WEBHOOK] Where would you like to store ${itemsToAdd}?`);
+                }
+                // ELSE (Location is specified where to store items)
+                else {
+                    speech = `[WEBHOOK] Okay, I will add ${itemsToAdd} to your ${locationToAddWithItem}.`;
+                }
+
                 // IF (The item doesn't exist)
                     // Tell user item has been added
                     // TODO @ ZACH: Make API call to populate fields on the item
