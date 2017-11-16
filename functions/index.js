@@ -54,8 +54,15 @@ const CART_PURCHASE = 'cart.purchase';
 // DIALOGFLOW CONTEXTS
 // TODO
 const ADD_CONTEXT = 'add';
+const LIST_CONTEXT = 'list';
+const REMOVE_CONTEXT = 'remove';
+const UPDATE_CONTEXT = 'update';
+const PURCHASE_CONTEXT = 'purchase';
 
-const LOCATION_CONTEXT = 'location';
+const LOCATION_CONTEXT = 'locations';
+const ITEM_CONTEXT = 'items';
+const EXPIRATION_CONTEXT = 'expire';
+const CART_CONTEXT = 'cart';
 
 // DIALOGFLOW CONTEXT PARAMETERS
 // TODO
@@ -146,9 +153,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
         switch (intent) {
             case LOCATION_ADD:
-                console.log("adding location");
-
-                console.log("setting location context");
+                console.log("adding location and setting location context");
                 assistant.setContext(LOCATION_CONTEXT);
 
                 // for debugging
@@ -158,7 +163,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 // console.log(JSON.stringify(assistant.getContext(LOCATION_CONTEXT).parameters, null, 4));
 
                 // get argument from the context; i.e. parameter --> value; locations --> fridge
-                const thingToAdd = assistant.getArgument('locations');
+                const thingToAdd = assistant.getArgument(LOCATION_CONTEXT);
 
                 console.log("CAN WE GET THE THING TO ADD????? LETS SEE: " + thingToAdd);
 
@@ -173,7 +178,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 break;
 
             case ITEM_ADD:
-                console.log("adding item");
+                console.log("adding item and setting item context");
+                assistant.setContext(ITEM_CONTEXT);
                 text = 'ITEM_ADD from webook';
                 // IF (The item doesn't exist)
                     // Tell user item has been added
@@ -185,11 +191,13 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
             case EXPIRATION_ADD:
                 console.log("adding expiration");
+                assistant.setContext(EXPIRATION_CONTEXT);
                 text = 'EXPIRATION_ADD from webook';
                 break;
 
             case CART_ADD:
                 console.log("adding to cart");
+                assistant.setContext(CART_CONTEXT);
                 text = 'CART_ADD from webook';
                 break;
 
@@ -208,20 +216,30 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         let text; // text to be returned to the user
         console.log("list");
 
+        assistant.setContext(LIST_CONTEXT); // set list context
+
         switch (intent) {
             case LOCATION_LIST:
+                console.log("listing locations and setting context");
+                assistant.setContext(LOCATION_CONTEXT);
                 text = 'LOCATION_LIST from webook';
                 break;
             
             case ITEM_LIST:
+                console.log("listing items and setting context");
+                assistant.setContext(ITEM_CONTEXT);
                 text = 'ITEM_LIST from webook';
                 break;
 
             case EXPIRATION_LIST:
+                console.log("listing expiration dates and setting context");
+                assistant.setContext(EXPIRATION_CONTEXT);
                 text = 'EXPIRATION_LIST from webook';
                 break;
 
             case CART_LIST:
+                console.log("listing cart and setting context");
+                assistant.setContext(CART_CONTEXT);
                 text = 'CART_LIST from webook';
                 break;
 
@@ -239,6 +257,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         let text; // text to be returned to the user
         console.log("remove");
 
+        assistant.setContext(REMOVE_CONTEXT);
+
         switch (intent) {
             case LOCATION_REMOVE:
                 // IF (The location doesn't exists)
@@ -246,18 +266,28 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 // ELSE (location exists)
                     // Tell user location has been deleted
                     // TODO @ ZACH: Query to delete item from DB
+
+
+                console.log("removing location and setting context");
+                assistant.setContext(LOCATION_CONTEXT);
                 text = 'LOCATION_REMOVE from webook';
                 break;
             
             case ITEM_REMOVE:
+                console.log("removing item and setting context");
+                assistant.setContext(ITEM_CONTEXT);
                 text = 'ITEM_REMOVE from webook';
                 break;
 
             case EXPIRATION_REMOVE:
+                console.log("removing expiration and setting context");
+                assistant.setContext(EXPIRATION_CONTEXT);
                 text = 'EXPIRATION_REMOVE from webook';
                 break;
 
             case CART_REMOVE:
+                console.log("removing from cart and setting context");
+                assistant.setContext(CART_CONTEXT);
                 text = 'CART_REMOVE from webook';
                 break;
                 
@@ -275,6 +305,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         let text; // text to be returned to the user
         console.log("update");
 
+        assistant.setContext(UPDATE_CONTEXT);
+
         switch (intent) {
             case LOCATION_UPDATE:
                 // IF (The location doesn't exist)
@@ -282,18 +314,26 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 // ELSE (location exists)
                     // Tell user the location has been updated
                     // TODO @ ZACH: Query to update database
+                console.log("updating location and setting context");
+                assistant.setContext(LOCATION_CONTEXT);
                 text = 'LOCATION_UPDATE from webook';
                 break;
             
             case ITEM_UPDATE:
+                console.log("updating item and setting context");
+                assistant.setContext(ITEM_CONTEXT);
                 text = 'ITEM_UPDATE from webook';
                 break;
 
             case EXPIRATION_UPDATE:
+                console.log("updating expiration date and setting context");
+                assistant.setContext(EXPIRATION_CONTEXT);
                 text = 'EXPIRATION_UPDATE from webook';
                 break;
 
             case CART_UPDATE:
+                console.log("updating cart and setting context");
+                assistant.setContext(CART_CONTEXT);
                 text = 'CART_UPDATE from webook';
                 break;
 
@@ -310,6 +350,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         const intent = assistant.getIntent(); // get the intent given by the user
         let text; // text to be returned to the user
         console.log("purchase");
+
+        assistant.setContext(PURCHASE_CONTEXT);
 
         // TODO: Connect to Google Transactions API
 
