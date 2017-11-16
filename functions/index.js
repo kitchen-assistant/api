@@ -117,39 +117,27 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     // Handle the welcome intent
     function welcome(assistant) {
-        const text = "Welcome! If you are seeing this, that means our own code is working and you are calling the welcome function. Hooray!";
-        const speech = text; // Output to DialogFlow
+        const speech = "Welcome! If you are seeing this, that means our own code is working and you are calling the welcome function. Hooray!";
         assistant.ask(speech); // Ask user something
     }
 
     // Handle the intent
     function defaultFallback(assistant) {
-        const text = "Default fallback! If you are seeing this, that means our own code is working and you are calling the default fallback function. Hooray!";
-        const speech = text;  // Output to DialogFlow
+        const speech = "Default fallback! If you are seeing this, that means our own code is working and you are calling the default fallback function. Hooray!";
         assistant.ask(speech); // Ask user something
     }
 
     function add(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
-        let text; // text to be returned to the user
+        let speech; // text to be returned to the user
         console.log("add");
 
         let userSpeech = assistant.getRawInput(); // Get exactly what the user said 
         console.log('The user said: ' + userSpeech);
 
-        // TODO @ JESSE: Get the actual thing to be added
-        // I need to extract the parameter values
-        // https://dialogflow.com/docs/actions-and-parameters#original
-        // let tryToGetArgument = assistant.getArgument(intent);
-        // console.log('Extracting from argument: ' + tryToGetArgument);
-
         // Set context
         console.log("setting add context");
         assistant.setContext(ADD_CONTEXT);
-
-        // let testContext = assistant.getContext(ADD_CONTEXT);
-        // console.log('trying to spit out context...' + testContext);
-
 
         switch (intent) {
             case LOCATION_ADD:
@@ -157,17 +145,15 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 assistant.setContext(LOCATION_CONTEXT);
 
                 // for debugging
-                // console.log(JSON.stringify(assistant.getContext(ADD_CONTEXT).parameters, null, 4));
-
-                // for debugging
                 // console.log(JSON.stringify(assistant.getContext(LOCATION_CONTEXT).parameters, null, 4));
 
-                // get argument from the context; i.e. parameter --> value; locations --> fridge
+                // extract the parameter values; i.e. parameter --> value; locations --> fridge
+                // This now extracts it as a list in dialogflow! woo.
+                // https://dialogflow.com/docs/actions-and-parameters
                 const thingToAdd = assistant.getArgument(LOCATION_CONTEXT);
 
-                console.log("CAN WE GET THE THING TO ADD????? LETS SEE: " + thingToAdd);
-
-                text = 'LOCATION_ADD from webook';
+                speech = `Okay, I will add ${thingToAdd} to your list of locations.`;
+                console.log(speech);
 
                 // TODO: Move below logic outside the switch statement in a exists function
                 // IF (The location doesn't exist)
@@ -180,7 +166,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             case ITEM_ADD:
                 console.log("adding item and setting item context");
                 assistant.setContext(ITEM_CONTEXT);
-                text = 'ITEM_ADD from webook';
+                speech = 'ITEM_ADD from webook';
                 // IF (The item doesn't exist)
                     // Tell user item has been added
                     // TODO @ ZACH: Make API call to populate fields on the item
@@ -198,22 +184,21 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             case CART_ADD:
                 console.log("adding to cart");
                 assistant.setContext(CART_CONTEXT);
-                text = 'CART_ADD from webook';
+                speech = 'CART_ADD from webook';
                 break;
 
             default:
                 console.log("adding default");
-                text = 'Hmm, I was not able to add that. Can you try again?';
+                speech = 'Hmm, I was not able to add that. Can you try again?';
                 break;
         }
         
-        const speech = text; // output to dialogflow
         assistant.ask(speech); // ask user something
     }
 
     function list(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
-        let text; // text to be returned to the user
+        let speech; // text to be returned to the user
         console.log("list");
 
         assistant.setContext(LIST_CONTEXT); // set list context
@@ -222,39 +207,38 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             case LOCATION_LIST:
                 console.log("listing locations and setting context");
                 assistant.setContext(LOCATION_CONTEXT);
-                text = 'LOCATION_LIST from webook';
+                speech = 'LOCATION_LIST from webook';
                 break;
             
             case ITEM_LIST:
                 console.log("listing items and setting context");
                 assistant.setContext(ITEM_CONTEXT);
-                text = 'ITEM_LIST from webook';
+                speech = 'ITEM_LIST from webook';
                 break;
 
             case EXPIRATION_LIST:
                 console.log("listing expiration dates and setting context");
                 assistant.setContext(EXPIRATION_CONTEXT);
-                text = 'EXPIRATION_LIST from webook';
+                speech = 'EXPIRATION_LIST from webook';
                 break;
 
             case CART_LIST:
                 console.log("listing cart and setting context");
                 assistant.setContext(CART_CONTEXT);
-                text = 'CART_LIST from webook';
+                speech = 'CART_LIST from webook';
                 break;
 
             default:
-                text = 'Hmm, I was not able to list that. Can you try again?';
+                speech = 'Hmm, I was not able to list that. Can you try again?';
                 break;
         }
 
-        const speech = text; // output to dialogflow
         assistant.ask(speech); // ask user something
     }
 
     function remove(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
-        let text; // text to be returned to the user
+        let speech; // text to be returned to the user
         console.log("remove");
 
         assistant.setContext(REMOVE_CONTEXT);
@@ -270,39 +254,38 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                 console.log("removing location and setting context");
                 assistant.setContext(LOCATION_CONTEXT);
-                text = 'LOCATION_REMOVE from webook';
+                speech = 'LOCATION_REMOVE from webook';
                 break;
             
             case ITEM_REMOVE:
                 console.log("removing item and setting context");
                 assistant.setContext(ITEM_CONTEXT);
-                text = 'ITEM_REMOVE from webook';
+                speech = 'ITEM_REMOVE from webook';
                 break;
 
             case EXPIRATION_REMOVE:
                 console.log("removing expiration and setting context");
                 assistant.setContext(EXPIRATION_CONTEXT);
-                text = 'EXPIRATION_REMOVE from webook';
+                speech = 'EXPIRATION_REMOVE from webook';
                 break;
 
             case CART_REMOVE:
                 console.log("removing from cart and setting context");
                 assistant.setContext(CART_CONTEXT);
-                text = 'CART_REMOVE from webook';
+                speech = 'CART_REMOVE from webook';
                 break;
                 
             default:
-                text = 'Hmm, I was not able to remove that. Can you try again?';
+                speech = 'Hmm, I was not able to remove that. Can you try again?';
                 break;
         }
 
-        const speech = text; // output to dialogflow
         assistant.ask(speech); // ask user something
     }
 
     function update(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
-        let text; // text to be returned to the user
+        let speech; // text to be returned to the user
         console.log("update");
 
         assistant.setContext(UPDATE_CONTEXT);
@@ -316,46 +299,44 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     // TODO @ ZACH: Query to update database
                 console.log("updating location and setting context");
                 assistant.setContext(LOCATION_CONTEXT);
-                text = 'LOCATION_UPDATE from webook';
+                speech = 'LOCATION_UPDATE from webook';
                 break;
             
             case ITEM_UPDATE:
                 console.log("updating item and setting context");
                 assistant.setContext(ITEM_CONTEXT);
-                text = 'ITEM_UPDATE from webook';
+                speech = 'ITEM_UPDATE from webook';
                 break;
 
             case EXPIRATION_UPDATE:
                 console.log("updating expiration date and setting context");
                 assistant.setContext(EXPIRATION_CONTEXT);
-                text = 'EXPIRATION_UPDATE from webook';
+                speech = 'EXPIRATION_UPDATE from webook';
                 break;
 
             case CART_UPDATE:
                 console.log("updating cart and setting context");
                 assistant.setContext(CART_CONTEXT);
-                text = 'CART_UPDATE from webook';
+                speech = 'CART_UPDATE from webook';
                 break;
 
             default:
-                text = 'Hmm, I was not able to update that. Can you try again?';
+            speech = 'Hmm, I was not able to update that. Can you try again?';
                 break;
         }
 
-        const speech = text; // output to dialogflow
         assistant.ask(speech); // ask user something
     }
 
     function purchase(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
-        let text; // text to be returned to the user
+        let speech; // text to be returned to the user
         console.log("purchase");
 
         assistant.setContext(PURCHASE_CONTEXT);
 
         // TODO: Connect to Google Transactions API
-
-        const speech = text;
+        
         assistant.ask(speech);
     }
 
