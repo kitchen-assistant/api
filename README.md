@@ -7,12 +7,12 @@
 # Cloning the git repo
 `git clone https://github.com/kitchen-assistant/api.git`
 
-# Deploying Fufillment (Firebase Cloud Functions)
-
-## Deploying the First Time
+# Installing Firebase
 [This guide](https://codelabs.developers.google.com/codelabs/assistant-codelab/index.html?index=..%2F..%2Findex#5) is the one I followed. [There's also one here.](https://developers.google.com/actions/dialogflow/deploy-fulfillment)
 
 `node --version`
+
+`npm install -g firebase-tools`
 
 `firebase --version`
 
@@ -32,6 +32,8 @@
 `cd functions`
 
 `npm install`
+
+# Deploying Fufillment
 
 `firebase deploy --only functions` or you can do `firebase deploy`
 
