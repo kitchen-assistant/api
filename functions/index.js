@@ -8,18 +8,13 @@
 // Debug, only turn this on if you want ALL the debug messages
 // process.env.DEBUG = 'actions-on-google:*';
 
-// Google Assistant helper library
-const DialogflowApp = require('actions-on-google').DialogflowApp;
+const DialogflowApp = require('actions-on-google').DialogflowApp; // Google Assistant helper library
+const functions = require('firebase-functions'); // Firebase Cloud Functions
+const admin = require('firebase-admin'); // Firebase Admin
 
-// Cloud Functions for Firebase library
-const functions = require('firebase-functions');
+admin.initializeApp(functions.config().firebase); // init firebase app
 
-// Firebase Admin
-const admin = require('firebase-admin');
-admin.initializeApp(functions.config().firebase);
-
-// Database access
-const dbref = admin.database().ref(); // can also specify a path to the db here
+var db = admin.firestore(); // Database access using firestore
 
 // DIALOGFLOW INTENT NAMES
 // Welcome and fallback
@@ -156,14 +151,26 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 
                 const locationToAdd = assistant.getArgument(LOCATION_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
 
-                speech = `Okay, I will add ${locationToAdd} to your list of locations.`;
+                // Move below logic outside the switch statement in a exists function?
 
-                // TODO: Move below logic outside the switch statement in a exists function?
-                // IF (The location doesn't exist)
+                // TODO IF (The location doesn't exist)
                     // Tell user location has been added
+                    speech = `Okay, I will add ${locationToAdd} to your list of locations.`;
+
                     // TODO @ ZACH: Query to add to database
-                // ELSE (location exists)
-                    // Tell user location exists already
+                    // TODO: How to get the current user 
+                    var userDoc = db.collection('users').doc("2mQJiD8oR2dvyqVJdW4O");
+
+                    // Add the location to the database with nothing in it
+                    var addLocationDoc = userDoc.set({
+                        locations : {
+                            [locationToAdd]: {}
+                        }
+                    });
+
+                // TODO ELSE (location exists)
+                    // TODO Tell user location exists already
+
                 break;
 
             case ITEM_ADD:
