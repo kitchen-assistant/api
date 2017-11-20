@@ -58,13 +58,14 @@ const REMOVE_CONTEXT = 'remove';
 const UPDATE_CONTEXT = 'update';
 const PURCHASE_CONTEXT = 'purchase';
 
+// DIALOGFLOW CONTEXT PARAMETERS (parameter --> value)
 const LOCATION_CONTEXT = 'locations';
 const ITEM_CONTEXT = 'items';
-const EXPIRATION_CONTEXT = 'expire';
-const CART_CONTEXT = 'cart';
 
-// DIALOGFLOW CONTEXT PARAMETERS
-// TODO
+const EXPIRATION_CONTEXT = 'expire';
+const DATE_CONTEXT = 'date';
+
+const CART_CONTEXT = 'cart';
 
 // TODO: Create multiple cloud functions for each one of these functions? Or at least structure project properly
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
@@ -192,7 +193,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     speech = `[WEBHOOK] Okay, I will add ${itemsToAdd} to your ${locationToAddWithItem}.`;
                 }
 
-                // IF (The item doesn't exist)
+                // IF (The item doesn't exist in the location)
                     // Tell user item has been added
                     // TODO @ ZACH: Make API call to populate fields on the item
                     // TODO @ ZACH: Query to add to database
@@ -203,18 +204,45 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             case EXPIRATION_ADD:
                 console.log("adding expiration");
                 assistant.setContext(EXPIRATION_CONTEXT);
-                speech = 'EXPIRATION_ADD from webook';
+                assistant.setContext(ITEM_CONTEXT); // not sure if we need to set these.. still don't really know what setting context does
+                assistant.setContext(DATE_CONTEXT); // not sure if we need this either
+
+                const expirationDateToAdd = assistant.getArgument(DATE_CONTEXT);
+                const itemsToAddToExpiration = assistant.getArgument(ITEM_CONTEXT);
+
+                // TODO: Might need duration param added
+
+                console.log("Expiration to add: " + expirationDateToAdd);
+                console.log("Items to add: " + itemsToAddToExpiration);
+
+                if(expirationDateToAdd == null && itemsToAddToExpiration == null) {
+                    assistant.ask(`[WEBHOOK] What item would you like to set to expire?`);
+                }
+                else if(expirationDateToAdd == null) {
+                    assistant.ask(`[WEBHOOK] What expiration date would you like to set on ${itemsToAddToExpiration}? Try saying it like MM-DD-YYYY`);
+                }
+                else if(itemsToAddToExpiration == null) {
+                    assistant.ask(`[WEBHOOK] What item would you like to set the expiration date of ${expirationDateToAdd}`);
+                }
+                else {
+                    speech = `[WEBHOOK] Okay, I will add an expiration date of ${expirationDateToAdd} to ${itemsToAddToExpiration}`;
+                }
+
                 break;
 
             case CART_ADD:
                 console.log("adding to cart");
                 assistant.setContext(CART_CONTEXT);
-                speech = 'CART_ADD from webook';
+                assistant.setContext(ITEM_CONTEXT);
+
+                const itemToAddToCart = assistant.getArgument(ITEM_CONTEXT);
+
+                speech = `[WEBHOOK] Okay, I will add ${itemToAddToCart} to your cart.`;
                 break;
 
             default:
                 console.log("adding default");
-                speech = 'Hmm, I was not able to add that. Can you try again?';
+                speech = 'Hmm, I was not able to add that expiration date. Can you try something like, set item to expire in 2 weeks?';
                 break;
         }
         
