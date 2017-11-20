@@ -140,32 +140,25 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     function add(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
         let speech; // text to be returned to the user
-        console.log("add");
-
-        let userSpeech = assistant.getRawInput(); // Get exactly what the user said 
-        console.log('The user said: ' + userSpeech);
+        console.log('The user said: ' + assistant.getRawInput()); // Get what the user said 
 
         // Set context
         console.log("setting add context");
         assistant.setContext(ADD_CONTEXT);
 
+        // SWITCH (The intent from the user)
         switch (intent) {
             case LOCATION_ADD:
                 console.log("adding location and setting location context");
                 assistant.setContext(LOCATION_CONTEXT);
 
-                // for debugging
-                // console.log(JSON.stringify(assistant.getContext(LOCATION_CONTEXT).parameters, null, 4));
-
-                // extract the parameter values; i.e. parameter --> value; locations --> fridge
-                // This now extracts it as a list in dialogflow! woo.
-                // https://dialogflow.com/docs/actions-and-parameters
-                const locationToAdd = assistant.getArgument(LOCATION_CONTEXT);
+                // console.log(JSON.stringify(assistant.getContext(LOCATION_CONTEXT).parameters, null, 4)); // for debugging
+                
+                const locationToAdd = assistant.getArgument(LOCATION_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
 
                 speech = `Okay, I will add ${locationToAdd} to your list of locations.`;
-                console.log(speech);
 
-                // TODO: Move below logic outside the switch statement in a exists function
+                // TODO: Move below logic outside the switch statement in a exists function?
                 // IF (The location doesn't exist)
                     // Tell user location has been added
                     // TODO @ ZACH: Query to add to database
@@ -177,12 +170,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 console.log("adding item and setting item context");
                 assistant.setContext(ITEM_CONTEXT);
 
-                // maybe add these all outside the cases? not sure...
-                const itemsToAdd = assistant.getArgument(ITEM_CONTEXT);
-                const locationToAddWithItem = assistant.getArgument(LOCATION_CONTEXT);
+                const itemsToAdd = assistant.getArgument(ITEM_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
+                const locationToAddWithItem = assistant.getArgument(LOCATION_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
 
-                console.log("Item to add: " + itemsToAdd);
-                console.log("Location to add: " + locationToAddWithItem);
+                console.log(`Item to add ${itemsToAdd}; Location to add: ${locationToAddWithItem}`);
 
                 // IF(The user hasn't specified where to store items, ie; 'Add milk', ask them where to store the items )
                 if (locationToAddWithItem == null) {
@@ -203,17 +194,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
             case EXPIRATION_ADD:
                 console.log("adding expiration");
-                assistant.setContext(EXPIRATION_CONTEXT);
+                assistant.setContext(EXPIRATION_CONTEXT); 
                 assistant.setContext(ITEM_CONTEXT); // not sure if we need to set these.. still don't really know what setting context does
                 assistant.setContext(DATE_CONTEXT); // not sure if we need this either
 
-                const expirationDateToAdd = assistant.getArgument(DATE_CONTEXT);
-                const itemsToAddToExpiration = assistant.getArgument(ITEM_CONTEXT);
+                const expirationDateToAdd = assistant.getArgument(DATE_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
+                const itemsToAddToExpiration = assistant.getArgument(ITEM_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
 
-                // TODO: Might need duration param added
-
-                console.log("Expiration to add: " + expirationDateToAdd);
-                console.log("Items to add: " + itemsToAddToExpiration);
+                console.log(`Expiration to add: ${expirationDateToAdd}; Items to add: ${itemsToAddToExpiration}`);
 
                 if(expirationDateToAdd == null && itemsToAddToExpiration == null) {
                     assistant.ask(`[WEBHOOK] What item would you like to set to expire?`);
@@ -237,6 +225,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                 const itemToAddToCart = assistant.getArgument(ITEM_CONTEXT);
 
+                console.log(`[WEBHOOK] Okay, I will add ${itemToAddToCart} to your cart.`);
                 speech = `[WEBHOOK] Okay, I will add ${itemToAddToCart} to your cart.`;
                 break;
 
