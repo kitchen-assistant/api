@@ -460,11 +460,10 @@ exports.createUserAccount = functions.auth.user().onCreate(event => {
     const uid = event.data.uid;
     const email = event.data.email; // some users might not have an email
 
-    // database ref to path
-    const newUserRef = dbref.child(`/users/${uid}`);
+    const userDoc = db.collection('users').doc(uid);
 
     // set name and email in the db
-    return newUserRef.set({
+    return userDoc.set({
         email: email
     })
 });
@@ -475,10 +474,10 @@ exports.cleanUpUserData = functions.auth.user().onDelete(event => {
     
     // get values from when user signed in through oauth
     const uid = event.data.uid;
-    const userRef = dbref.child(`/users/${uid}`);
+    const userDoc = db.collection('users').doc(uid);
 
     // set isDeleted flag in the database when a user deletes their account
-    return userRef.update({
+    return userDoc.update({
         isDeleted: true
     })
 });
