@@ -120,8 +120,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         console.log('Your name is: ' + assistant.getUserName().displayName);
     }
 
-    testUserDisplays();
-
+    /**
+     * Request permission to get access to your name and id. Access by saying "login"
+     * @param {*} assistant 
+     */
     function requestPermission(assistant) {
         console.log('CALLING REQUEST PERMISSION');
         assistant.setContext(REQUEST_PERMISSION_ACTION);
@@ -130,6 +132,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         assistant.askForPermission('[WEBHOOK] To know who you are', permission);
     }
 
+    /**
+     * Say the name of the user once they have asked permission. Access by saying "what is my name"
+     * @param {*} assistant 
+     */
     function sayName(assistant) {
         console.log("TRYING TO SAY NAME");
         assistant.setContext(SAY_NAME_ACTION);
@@ -144,13 +150,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         else {
           assistant.ask('[WEBHOOK] Sorry, I could not get your name. You need to sign in before using the app. Trying saying "login".');
         }
-    }
-
-    function boilerPlateIntentHandler(assistant) {
-        // Get the prior question
-        // Define parameters
-        // Set the context
-        // Ask the user something
     }
 
     /**
@@ -196,12 +195,13 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                 // Move below logic outside the switch statement in a exists function?
 
-                // TODO IF (The location doesn't exist)
+                // TODO 
+                // IF (The location doesn't exist (query the database))
                     // Tell user location has been added
                     speech = `Okay, I will add ${locationToAdd} to your list of locations.`;
 
-                    // TODO @ ZACH: Query to add to database
-                    // TODO: How to get the current user 
+                    // Query to add to database, need to get the proper id here
+                    // Question: Are we using the id generated in authentication or the google id?
                     var userDoc = db.collection('users').doc("2mQJiD8oR2dvyqVJdW4O");
 
                     // Add the location to the database with nothing in it
@@ -211,8 +211,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         }
                     });
 
-                // TODO ELSE (location exists)
-                    // TODO Tell user location exists already
+                // ELSE (location exists)
+                    // Tell user location exists already
 
                 break;
 
@@ -449,8 +449,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     }
 
 });
-
-// TODO @ JESSE: Update these functions to be consistent with database schema 
 
 // Handle new user auth events
 // Thanks to https://www.youtube.com/watch?v=pADTJA3BoxE&t=187s
