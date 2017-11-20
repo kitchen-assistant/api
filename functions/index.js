@@ -62,6 +62,10 @@ const DATE_CONTEXT = 'date';
 
 const CART_CONTEXT = 'cart';
 
+// Permission stuff
+const REQUEST_PERMISSION_ACTION = 'permissions.request';
+const SAY_NAME_ACTION = 'permissions.sayname';
+
 // TODO: Create multiple cloud functions for each one of these functions? Or at least structure project properly
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
     console.log('Request headers: ' + JSON.stringify(request.headers));
@@ -100,8 +104,47 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     actionMap.set(CART_REMOVE, remove);
     actionMap.set(CART_UPDATE, update);
     actionMap.set(CART_PURCHASE, purchase);
+
+    // Permissions
+    actionMap.set(REQUEST_PERMISSION_ACTION, requestPermission);
+    actionMap.set(SAY_NAME_ACTION, sayName);
     
     assistant.handleRequest(actionMap);
+
+    /*******************/
+    /* BEGIN FUNCTIONS */
+    /*******************/
+
+    function testUserDisplays () {
+        console.log('Your USER ID is: ' + assistant.getUser().userId);
+        console.log('Your name is: ' + assistant.getUserName().displayName);
+    }
+
+    testUserDisplays();
+
+    function requestPermission(assistant) {
+        console.log('CALLING REQUEST PERMISSION');
+        assistant.setContext(REQUEST_PERMISSION_ACTION);
+
+        const permission = assistant.SupportedPermissions.NAME;
+        assistant.askForPermission('[WEBHOOK] To know who you are', permission);
+    }
+
+    function sayName(assistant) {
+        console.log("TRYING TO SAY NAME");
+        assistant.setContext(SAY_NAME_ACTION);
+
+        // User granted permission
+        if (assistant.isPermissionGranted()) {
+          assistant.ask('Your name is ' + assistant.getUserName().displayName);
+          console.log('Trying to get user ID' + assistant.getUser().userId);
+        } 
+
+        // Response shows that user did not grant permission
+        else {
+          assistant.ask('[WEBHOOK] Sorry, I could not get your name. You need to sign in before using the app. Trying saying "login".');
+        }
+    }
 
     function boilerPlateIntentHandler(assistant) {
         // Get the prior question
@@ -115,7 +158,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
      * @param {*} assistant 
      */
     function welcome(assistant) {
-        const speech = "Welcome! If you are seeing this, that means our own code is working and you are calling the welcome function. Hooray!";
+        const speech = "[WEBHOOK] Welcome to Kitchen Assist!";
         assistant.ask(speech); // Ask user something
     }
 
@@ -124,7 +167,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
      * @param {*} assistant 
      */
     function defaultFallback(assistant) {
-        const speech = "Default fallback! If you are seeing this, that means our own code is working and you are calling the default fallback function. Hooray!";
+        const speech = "[WEBHOOK] Oops, sorry. I didn't get that.";
         assistant.ask(speech); // Ask user something
     }
 
