@@ -10,11 +10,11 @@
 # Installing Firebase
 [This guide](https://codelabs.developers.google.com/codelabs/assistant-codelab/index.html?index=..%2F..%2Findex#5) is the one I followed. [There's also one here.](https://developers.google.com/actions/dialogflow/deploy-fulfillment)
 
-`node --version`
+`node --version` --> Ensure you have node installed
 
 `npm install -g firebase-tools`
 
-`firebase --version`
+`firebase --version` --> Check the version
 
 `mkdir testing-fufillment`
 
@@ -33,9 +33,11 @@
 
 `npm install`
 
+`npm install --save firebase-admin@^5.4.0` --> For connecting to the database
+
 # Deploying Fufillment
 
-`firebase deploy --only functions` or you can do `firebase deploy`
+`firebase deploy --only functions:dialogflowFirebaseFulfillment`
 
 The CLI should print a message to the terminal with the URL of the endpoint where the function will respond and the console.
 
@@ -54,7 +56,7 @@ Note that in our case, we didn't actually get an endpoint through the CLI becaus
 # Running the project locally
 ## Serving the firebase project locally
 
-`firebase serve --only functions`
+`firebase serve --only functions:dialogflowFirebaseFulfillment`
 
 You'll get something like this in the CLI `http://localhost:5000/kitchen-assistant-8b1db/us-central1/dialogflowFirebaseFulfillment`
 
