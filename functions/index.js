@@ -207,14 +207,16 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                     // Query to add to database, need to get the proper id here
                     // Question: Are we using the id generated in authentication or the google id?
-                    var userDoc = db.collection('users').doc("2mQJiD8oR2dvyqVJdW4O");
+                    var userDoc = db.collection('users').doc("JESSE_HARDCODE_TEST_ID");
 
-                    // Add the location to the database with nothing in it
-                    var addLocationDoc = userDoc.set({
+                    var data = {
                         locations : {
                             [locationToAdd]: {}
                         }
-                    });
+                    }
+
+                    // Add the location to the database with nothing in it
+                    var addLocationDoc = userDoc.set(data);
 
                 // ELSE (location exists)
                     // Tell user location exists already
@@ -237,6 +239,18 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 // ELSE (Location is specified where to store items)
                 else {
                     speech = `[WEBHOOK] Okay, I will add ${itemsToAdd} to your ${locationToAddWithItem}.`;
+                    
+                    var userDoc = db.collection('users').doc("JESSE_HARDCODE_TEST_ID");
+
+                    var data = {
+                        locations : {
+                            [locationToAddWithItem]: {
+                                [itemsToAdd] : {}
+                            }
+                        }
+                    }
+
+                    var addItemsToLocationDoc = userDoc.set(data);
                 }
 
                 // TODO
@@ -255,6 +269,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 assistant.setContext(DATE_CONTEXT); // not sure if we need this either
 
                 const expirationDateToAdd = assistant.getArgument(DATE_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
+                const locationToAddWithItemExpirationDate = assistant.getArgument(LOCATION_CONTEXT);
                 const itemsToAddToExpiration = assistant.getArgument(ITEM_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
 
                 console.log(`Expiration to add: ${expirationDateToAdd}; Items to add: ${itemsToAddToExpiration}`);
@@ -268,8 +283,26 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 else if(itemsToAddToExpiration == null) {
                     assistant.ask(`[WEBHOOK] What item would you like to set the expiration date of ${expirationDateToAdd}`);
                 }
+                else if(locationToAddWithItemExpirationDate == null) {
+                    assistant.ask(`[WEBHOOK] Where would you like to set these items to expire?`);
+                }
                 else {
-                    speech = `[WEBHOOK] Okay, I will add an expiration date of ${expirationDateToAdd} to ${itemsToAddToExpiration}`;
+                    speech = `[WEBHOOK] Okay, I will add an expiration date of ${expirationDateToAdd} to ${itemsToAddToExpiration} in your ${locationToAddWithItemExpirationDate}`;
+
+                    var userDoc = db.collection('users').doc("JESSE_HARDCODE_TEST_ID");
+
+                    var data = {
+                        locations : {
+                            [locationToAddWithItemExpirationDate]: {
+                                [itemsToAddToExpiration] : {
+                                    'expiration-date': new Date(expirationDateToAdd)
+                                }
+                            }
+                        }
+                    }
+
+                    var addItemsToLocationDoc = userDoc.set(data);
+
                 }
 
                 break;
@@ -281,8 +314,19 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                 const itemToAddToCart = assistant.getArgument(ITEM_CONTEXT);
 
-                console.log(`[WEBHOOK] Okay, I will add ${itemToAddToCart} to your cart.`);
                 speech = `[WEBHOOK] Okay, I will add ${itemToAddToCart} to your cart.`;
+
+                // Probably just want to set a flag, inCart set to true or false for this.
+                var userDoc = db.collection('users').doc("JESSE_HARDCODE_TEST_ID");
+
+                var data = {
+                    cart : {
+                        [itemToAddToCart]: {}
+                    }
+                }
+
+                var addItemsToLocationDoc = userDoc.set(data);
+                
                 break;
 
             default:
