@@ -62,6 +62,11 @@ const DATE_CONTEXT = 'date';
 
 const CART_CONTEXT = 'cart';
 
+// Update context (same as above)
+const LOCATION_TO_UPDATE = 'locationToUpdate';
+const ITEM_TO_UPDATE = 'itemToUpdate';
+const ITEM_IN_CART_TO_UPDATE = 'cartItemToUpdate';
+
 // Permission stuff
 const REQUEST_PERMISSION_ACTION = 'permissions.request';
 const SAY_NAME_ACTION = 'permissions.sayname';
@@ -234,6 +239,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     speech = `[WEBHOOK] Okay, I will add ${itemsToAdd} to your ${locationToAddWithItem}.`;
                 }
 
+                // TODO
                 // IF (The item doesn't exist in the location)
                     // Tell user item has been added
                     // TODO @ ZACH: Make API call to populate fields on the item
@@ -303,25 +309,41 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             case LOCATION_LIST:
                 console.log("listing locations and setting context");
                 assistant.setContext(LOCATION_CONTEXT);
-                speech = 'LOCATION_LIST from webook';
+                
+                const locationToList = assistant.getArgument(LOCATION_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
+
+                // TODO: Make database call to get all the stored database locations
+                speech = '[WEBHOOK] The locations that you have are <DB_CALL>.';
                 break;
             
             case ITEM_LIST:
                 console.log("listing items and setting context");
                 assistant.setContext(ITEM_CONTEXT);
-                speech = 'ITEM_LIST from webook';
+
+                const itemsInLocationToList = assistant.getArgument(LOCATION_CONTEXT);
+
+                if(itemsInLocationToList == null) {
+                    assistant.ask('Which location should I list your items?');
+                }
+                else {
+                    // TODO: Make database call to get all the items in the given location and list the expiration dates on the items if they have one
+                    speech = `[WEBHOOK] The items that are in your ${itemsInLocationToList} are: <DB_CALL>`;
+                }
+
                 break;
 
             case EXPIRATION_LIST:
                 console.log("listing expiration dates and setting context");
                 assistant.setContext(EXPIRATION_CONTEXT);
-                speech = 'EXPIRATION_LIST from webook';
+
+                speech = '[WEBHOOK] The expiration dates that you have are <DB_CALL FOR ALL EXPIRATION DATES IN ALL LOCATIONS>';
                 break;
 
             case CART_LIST:
                 console.log("listing cart and setting context");
                 assistant.setContext(CART_CONTEXT);
-                speech = 'CART_LIST from webook';
+
+                speech = '[WEBBOOK] The items that are in your cart are <DB_CALL>';
                 break;
 
             default:
@@ -345,34 +367,75 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
         switch (intent) {
             case LOCATION_REMOVE:
-                // IF (The location doesn't exists)
-                    // Tell user location doesn't exist to delete
-                // ELSE (location exists)
-                    // Tell user location has been deleted
-                    // TODO @ ZACH: Query to delete item from DB
-
-
                 console.log("removing location and setting context");
                 assistant.setContext(LOCATION_CONTEXT);
-                speech = 'LOCATION_REMOVE from webook';
+
+                const locationToRemove = assistant.getArgument(LOCATION_CONTEXT);
+
+                // IF (The location does not exist)
+                    // Tell user location does not exist
+                
+                // ELSE (location exists)
+                    // Tell user location has been deleted
+                    speech = `[WEBHOOK] I will remove ${locationToRemove} from your list of locations.`;
+                    // Query to delete item from DB
+
                 break;
             
             case ITEM_REMOVE:
                 console.log("removing item and setting context");
                 assistant.setContext(ITEM_CONTEXT);
-                speech = 'ITEM_REMOVE from webook';
+
+                const locationWithItemToRemove = assistant.getArgument(LOCATION_CONTEXT);
+                const itemToRemove = assistant.getArgument(ITEM_CONTEXT);
+
+                if(locationWithItemToRemove == null) {
+                    assistant.ask(`[WEBHOOK] Which location should I remove ${itemToRemove} from?`);
+                }
+                else {
+                    // IF (The item in specific location does not exist)
+                        // Tell user the item in the location does not exist
+                    // ELSE (location exists)
+                        // Tell user location has been deleted
+                        speech = `[WEBHOOK] I will remove ${itemToRemove} from your ${locationWithItemToRemove}.`;
+                        // Query to delete item from database
+                }
+
                 break;
 
             case EXPIRATION_REMOVE:
                 console.log("removing expiration and setting context");
                 assistant.setContext(EXPIRATION_CONTEXT);
-                speech = 'EXPIRATION_REMOVE from webook';
+
+                const locationWithItemToRemoveExpirationDate = assistant.getArgument(LOCATION_CONTEXT);
+                const itemToRemoveExpirationDate = assistant.getArgument(ITEM_CONTEXT);
+
+                if(locationWithItemToRemoveExpirationDate == null) {
+                    assistant.ask(`[WEBHOOK] Which location should I remove the expiration date of ${itemToRemoveExpirationDate} from?`);
+                }
+                else {
+                    // IF (The item in specific location does not exist)
+                        // Tell user the item in the location does not exist and there is no expiration date to remove
+                    // ELSE (location exists)
+                        // Tell user location has been deleted
+                        speech = `[WEBHOOK] I will remove the expiration date of ${itemToRemoveExpirationDate} from your ${locationWithItemToRemoveExpirationDate}.`;
+                        // Query to delete item from database
+                }
+
                 break;
 
             case CART_REMOVE:
                 console.log("removing from cart and setting context");
                 assistant.setContext(CART_CONTEXT);
-                speech = 'CART_REMOVE from webook';
+
+                const itemToRemoveFromCart = assistant.getArgument(ITEM_CONTEXT);
+
+                // IF (The item in specific does not exist in the cart)
+                    // Tell user the item in the location does not exist
+                // ELSE (item in cart exists)
+                    // Tell user item in cart has been removed
+                    speech = `[WEBHOOK] I will remove ${itemToRemoveFromCart} from your cart.`;
+                    // Query to delete item from database in cart
                 break;
                 
             default:
@@ -396,32 +459,99 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
         switch (intent) {
             case LOCATION_UPDATE:
-                // IF (The location doesn't exist)
-                    // Tell user location doesn't exist, and ask if they would like to add it.
-                // ELSE (location exists)
-                    // Tell user the location has been updated
-                    // TODO @ ZACH: Query to update database
                 console.log("updating location and setting context");
                 assistant.setContext(LOCATION_CONTEXT);
-                speech = 'LOCATION_UPDATE from webook';
+
+                const locationToUpdate = assistant.getArgument(LOCATION_CONTEXT);
+                const locationToUpdateTo = assistant.getArgument(LOCATION_TO_UPDATE);
+
+                if(locationToUpdateTo == null) {
+                    assistant.ask(`[WEBHOOK] What should I update the name of ${locationToUpdate} to?`);
+                }
+                else {
+                    // TODO
+                    // IF (The location doesn't exist)
+                        // Tell user location doesn't exist, and ask if they would like to add it.
+                    // ELSE (location exists)
+                        // Tell user the location's name has been updated
+                        speech = `[WEBHOOK] Okay, I will update your ${locationToUpdate} to ${locationToUpdateTo}.`;
+                        // Query to update database
+                }
                 break;
             
             case ITEM_UPDATE:
                 console.log("updating item and setting context");
                 assistant.setContext(ITEM_CONTEXT);
-                speech = 'ITEM_UPDATE from webook';
+
+                const locationToUpdateItem = assistant.getArgument(LOCATION_CONTEXT);
+                const itemToUpdate = assistant.getArgument(ITEM_CONTEXT);
+                const itemToUpdateTo = assistant.getArgument(ITEM_TO_UPDATE);
+
+                if(itemToUpdateTo == null) {
+                    assistant.ask(`[WEBHOOK] What should I update the name of ${itemToUpdate} to?`);
+                }
+                else if (locationToUpdateItem == null) {
+                    assistant.ask(`[WEBHOOK] What location should I update ${itemToUpdate} from?`);
+                }
+                else {
+                    // TODO
+                    // IF (The location doesn't exist)
+                        // Tell user location doesn't exist, and ask if they would like to add it.
+                    // ELSE (location exists)
+                        // Tell user the location's name has been updated
+                        speech = `[WEBHOOK] Okay, I will update your ${itemToUpdate} to ${itemToUpdateTo} in your ${locationToUpdateItem}.`;
+                        // Query to update database
+                }
                 break;
 
             case EXPIRATION_UPDATE:
                 console.log("updating expiration date and setting context");
                 assistant.setContext(EXPIRATION_CONTEXT);
-                speech = 'EXPIRATION_UPDATE from webook';
+                assistant.setContext(ITEM_CONTEXT); // not sure if we need to set these.. still don't really know what setting context does
+                assistant.setContext(DATE_CONTEXT); // not sure if we need this either
+
+                const expirationDateToUpdate = assistant.getArgument(DATE_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
+                const itemsToUpdateToExpiration = assistant.getArgument(ITEM_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
+
+                console.log(`Expiration to add: ${expirationDateToUpdate}; Items to add: ${itemsToUpdateToExpiration}`);
+
+                if(expirationDateToUpdate == null && itemsToUpdateToExpiration == null) {
+                    assistant.ask(`[WEBHOOK] What item would you like to update expiration?`);
+                }
+                else if(expirationDateToUpdate == null) {
+                    assistant.ask(`[WEBHOOK] What expiration date would you like to update on ${itemsToUpdateToExpiration}? Try saying it like MM-DD-YYYY`);
+                }
+                else if(itemsToUpdateToExpiration == null) {
+                    assistant.ask(`[WEBHOOK] What item would you like to update the expiration date of ${expirationDateToUpdate}`);
+                }
+                else {
+                    speech = `[WEBHOOK] Okay, I will update the expiration date of ${expirationDateToUpdate} to ${itemsToUpdateToExpiration}`;
+                }
+
                 break;
 
             case CART_UPDATE:
                 console.log("updating cart and setting context");
                 assistant.setContext(CART_CONTEXT);
-                speech = 'CART_UPDATE from webook';
+
+                const itemToUpdateInCart = assistant.getArgument(ITEM_CONTEXT);
+                const itemToUpdateInCartTo = assistant.getArgument(ITEM_IN_CART_TO_UPDATE);
+
+                if(itemToUpdateInCart == null) {
+                    assistant.ask(`[WEBHOOK] What should I update your cart item to?`);
+                }
+                else if (itemToUpdateInCartTo == null) {
+                    assistant.ask(`[WEBHOOK] What should I update the name of ${itemToUpdateInCart} in your cart to?`);
+                }
+                else {
+                    // TODO
+                    // IF (The location doesn't exist)
+                        // Tell user location doesn't exist, and ask if they would like to add it.
+                    // ELSE (location exists)
+                        // Tell user the location's name has been updated
+                        speech = `[WEBHOOK] Okay, I will update ${itemToUpdateInCart} to ${itemToUpdateInCartTo} in your cart.`;
+                        // Query to update database
+                }
                 break;
 
             default:
