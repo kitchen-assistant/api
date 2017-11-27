@@ -205,18 +205,24 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     // Tell user location has been added
                     speech = `Okay, I will add ${locationToAdd} to your list of locations.`;
 
-                    // Query to add to database, need to get the proper id here
-                    // Question: Are we using the id generated in authentication or the google id?
-                    var userDoc = db.collection('users').doc("JESSE_HARDCODE_TEST_ID");
+                    // Query to add to database, need to get the proper id here, Question: Are we using the id generated in authentication or the google id?
+                    // Add a hardcoded ID to the database. There might be a better way to do this.
+                    var userDoc = db.collection('users')
+                                    .doc('JESSE_HARDCODE_TEST_ID')
+                                    .collection('locations')
+                                    .doc(locationToAdd.toString())
+                                    .set({});
 
-                    var data = {
-                        locations : {
-                            [locationToAdd]: {}
-                        }
-                    }
 
-                    // Add the location to the database with nothing in it
-                    var addLocationDoc = userDoc.set(data);
+                    // nodejs way (this doesn't work)
+                    // userDoc works when the doc field is ONLY blank (otherwise there is an error that the doc is already used)
+                    // var userDoc = db.collection('users').doc('JESSE_HARDCODE_TEST_ID').collection('locations'); 
+
+                    // userDoc.create(data).then((res) => {
+                    //     console.log(`Document created at ${res.updateTime}`);
+                    // }).catch((err) => {
+                    //     console.log(`Failed to create document: ${err}`);
+                    // });
 
                 // ELSE (location exists)
                     // Tell user location exists already
@@ -326,7 +332,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 }
 
                 var addItemsToLocationDoc = userDoc.set(data);
-                
+
                 break;
 
             default:
