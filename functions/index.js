@@ -162,7 +162,11 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
      * @param {*} assistant 
      */
     function welcome(assistant) {
-        assistant.ask('[WEBHOOK] Welcome to Kitchen Assist!'); // Ask user something
+        console.log('CALLING REQUEST PERMISSION');
+        assistant.setContext(REQUEST_PERMISSION_ACTION);
+
+        const permission = assistant.SupportedPermissions.NAME;
+        assistant.askForPermission('[WEBHOOK] Welcome to Kitchen Assist. In order to use this app we need to know who you are', permission);
     }
 
     /**
@@ -180,6 +184,9 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     function add(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
         console.log('The user said: ' + assistant.getRawInput()); // Get what the user said 
+
+        console.log('Your USER ID is: ' + assistant.getUser().userId);
+        console.log('Your name is: ' + assistant.getUserName().displayName);
 
         // Set context
         console.log("setting add context");
