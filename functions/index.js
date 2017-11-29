@@ -162,8 +162,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
      * @param {*} assistant 
      */
     function welcome(assistant) {
-        const speech = "[WEBHOOK] Welcome to Kitchen Assist!";
-        assistant.ask(speech); // Ask user something
+        assistant.ask('[WEBHOOK] Welcome to Kitchen Assist!'); // Ask user something
     }
 
     /**
@@ -171,8 +170,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
      * @param {*} assistant 
      */
     function defaultFallback(assistant) {
-        const speech = "[WEBHOOK] Oops, sorry. I didn't get that.";
-        assistant.ask(speech); // Ask user something
+        assistant.ask("[WEBHOOK] Oops, sorry. I didn't get that."); // Ask user something
     }
 
     /**
@@ -342,7 +340,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
      */
     function list(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
-        let speech; // text to be returned to the user
         console.log("list");
 
         assistant.setContext(LIST_CONTEXT); // set list context
@@ -355,7 +352,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 const locationToList = assistant.getArgument(LOCATION_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
 
                 // TODO: Make database call to get all the stored database locations
-                speech = '[WEBHOOK] The locations that you have are <DB_CALL>.';
+                assistant.ask('[WEBHOOK] The locations that you have are <DB_CALL>.');
                 break;
             
             case ITEM_LIST:
@@ -369,7 +366,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 }
                 else {
                     // TODO: Make database call to get all the items in the given location and list the expiration dates on the items if they have one
-                    speech = `[WEBHOOK] The items that are in your ${itemsInLocationToList} are: <DB_CALL>`;
+                    assistant.ask(`[WEBHOOK] The items that are in your ${itemsInLocationToList} are: <DB_CALL>`);
                 }
 
                 break;
@@ -378,22 +375,20 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 console.log("listing expiration dates and setting context");
                 assistant.setContext(EXPIRATION_CONTEXT);
 
-                speech = '[WEBHOOK] The expiration dates that you have are <DB_CALL FOR ALL EXPIRATION DATES IN ALL LOCATIONS>';
+                assistant.ask('[WEBHOOK] The expiration dates that you have are <DB_CALL FOR ALL EXPIRATION DATES IN ALL LOCATIONS>');
                 break;
 
             case CART_LIST:
                 console.log("listing cart and setting context");
                 assistant.setContext(CART_CONTEXT);
 
-                speech = '[WEBBOOK] The items that are in your cart are <DB_CALL>';
+                assistant.ask('[WEBBOOK] The items that are in your cart are <DB_CALL>');
                 break;
 
             default:
-                speech = 'Hmm, I was not able to list that. Can you try again?';
+                assistant.ask('Hmm, I was not able to list that. Can you try again?');
                 break;
         }
-
-        assistant.ask(speech); // ask user something
     }
 
     /**
@@ -402,7 +397,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
      */
     function remove(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
-        let speech; // text to be returned to the user
         console.log("remove");
 
         assistant.setContext(REMOVE_CONTEXT);
@@ -419,7 +413,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 
                 // ELSE (location exists)
                     // Tell user location has been deleted
-                    speech = `[WEBHOOK] I will remove ${locationToRemove} from your list of locations.`;
+                    assistant.ask(`[WEBHOOK] I will remove ${locationToRemove} from your list of locations.`);
                     // Query to delete item from DB
 
                 break;
@@ -439,7 +433,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         // Tell user the item in the location does not exist
                     // ELSE (location exists)
                         // Tell user location has been deleted
-                        speech = `[WEBHOOK] I will remove ${itemToRemove} from your ${locationWithItemToRemove}.`;
+                        assistant.ask(`[WEBHOOK] I will remove ${itemToRemove} from your ${locationWithItemToRemove}.`);
                         // Query to delete item from database
                 }
 
@@ -460,7 +454,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         // Tell user the item in the location does not exist and there is no expiration date to remove
                     // ELSE (location exists)
                         // Tell user location has been deleted
-                        speech = `[WEBHOOK] I will remove the expiration date of ${itemToRemoveExpirationDate} from your ${locationWithItemToRemoveExpirationDate}.`;
+                        assistant.ask(`[WEBHOOK] I will remove the expiration date of ${itemToRemoveExpirationDate} from your ${locationWithItemToRemoveExpirationDate}.`);
                         // Query to delete item from database
                 }
 
@@ -476,16 +470,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     // Tell user the item in the location does not exist
                 // ELSE (item in cart exists)
                     // Tell user item in cart has been removed
-                    speech = `[WEBHOOK] I will remove ${itemToRemoveFromCart} from your cart.`;
+                    assistant.ask(`[WEBHOOK] I will remove ${itemToRemoveFromCart} from your cart.`);
                     // Query to delete item from database in cart
                 break;
                 
             default:
-                speech = 'Hmm, I was not able to remove that. Can you try again?';
+                assistant.ask('Hmm, I was not able to remove that. Can you try again?');
                 break;
         }
-
-        assistant.ask(speech); // ask user something
     }
 
     /**
@@ -494,7 +486,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
      */    
     function update(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
-        let speech; // text to be returned to the user
         console.log("update");
 
         assistant.setContext(UPDATE_CONTEXT);
@@ -516,7 +507,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         // Tell user location doesn't exist, and ask if they would like to add it.
                     // ELSE (location exists)
                         // Tell user the location's name has been updated
-                        speech = `[WEBHOOK] Okay, I will update your ${locationToUpdate} to ${locationToUpdateTo}.`;
+                        assistant.ask(`[WEBHOOK] Okay, I will update your ${locationToUpdate} to ${locationToUpdateTo}.`);
                         // Query to update database
                 }
                 break;
@@ -541,7 +532,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         // Tell user location doesn't exist, and ask if they would like to add it.
                     // ELSE (location exists)
                         // Tell user the location's name has been updated
-                        speech = `[WEBHOOK] Okay, I will update your ${itemToUpdate} to ${itemToUpdateTo} in your ${locationToUpdateItem}.`;
+                        assistant.ask(`[WEBHOOK] Okay, I will update your ${itemToUpdate} to ${itemToUpdateTo} in your ${locationToUpdateItem}.`);
                         // Query to update database
                 }
                 break;
@@ -567,7 +558,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     assistant.ask(`[WEBHOOK] What item would you like to update the expiration date of ${expirationDateToUpdate}`);
                 }
                 else {
-                    speech = `[WEBHOOK] Okay, I will update the expiration date of ${expirationDateToUpdate} to ${itemsToUpdateToExpiration}`;
+                    assistant.ask(`[WEBHOOK] Okay, I will update the expiration date of ${expirationDateToUpdate} to ${itemsToUpdateToExpiration}`);
                 }
 
                 break;
@@ -591,17 +582,15 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         // Tell user location doesn't exist, and ask if they would like to add it.
                     // ELSE (location exists)
                         // Tell user the location's name has been updated
-                        speech = `[WEBHOOK] Okay, I will update ${itemToUpdateInCart} to ${itemToUpdateInCartTo} in your cart.`;
+                        assistant.ask(`[WEBHOOK] Okay, I will update ${itemToUpdateInCart} to ${itemToUpdateInCartTo} in your cart.`);
                         // Query to update database
                 }
                 break;
 
             default:
-                speech = 'Hmm, I was not able to update that. Can you try again?';
+                assistant.ask('Hmm, I was not able to update that. Can you try again?');
                 break;
         }
-
-        assistant.ask(speech); // ask user something
     }
 
     /**
@@ -610,14 +599,13 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
      */
     function purchase(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
-        let speech; // text to be returned to the user
         console.log("purchase");
 
         assistant.setContext(PURCHASE_CONTEXT);
 
         // TODO @ Zach: Connect to Google Transactions API
         
-        assistant.ask(speech);
+        assistant.ask('I see you want to purchase something. This is not implemented yet. ');
     }
 
 });
