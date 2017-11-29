@@ -181,7 +181,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
      */
     function add(assistant) {
         const intent = assistant.getIntent(); // get the intent given by the user
-        let speech; // text to be returned to the user
         console.log('The user said: ' + assistant.getRawInput()); // Get what the user said 
 
         // Set context
@@ -197,36 +196,31 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 // console.log(JSON.stringify(assistant.getContext(LOCATION_CONTEXT).parameters, null, 4)); // for debugging
                 
                 const locationToAdd = assistant.getArgument(LOCATION_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
-
-                // Move below logic outside the switch statement in a exists function?
-
-                // TODO 
-                // IF (The location doesn't exist (query the database))
-                    // Tell user location has been added
-                    speech = `Okay, I will add ${locationToAdd} to your list of locations.`;
-
-                    // Query to add to database, need to get the proper id here, Question: Are we using the id generated in authentication or the google id?
-                    // Add a hardcoded ID to the database. There might be a better way to do this.
-                    var userDoc = db.collection('users')
-                                    .doc('JESSE_HARDCODE_TEST_ID')
-                                    .collection('locations')
-                                    .doc(locationToAdd.toString())
-                                    .set({});
-
-
-                    // nodejs way (this doesn't work)
-                    // userDoc works when the doc field is ONLY blank (otherwise there is an error that the doc is already used)
-                    // var userDoc = db.collection('users').doc('JESSE_HARDCODE_TEST_ID').collection('locations'); 
-
-                    // userDoc.create(data).then((res) => {
-                    //     console.log(`Document created at ${res.updateTime}`);
-                    // }).catch((err) => {
-                    //     console.log(`Failed to create document: ${err}`);
-                    // });
-
-                // ELSE (location exists)
-                    // Tell user location exists already
-
+                
+                // Query for adding location (can probably break this up more)
+                var addLocationQuery = db.collection('users')
+                                         .doc('JESSE_HARDCODE_TEST_ID')
+                                         .collection('locations')
+                                         .doc(locationToAdd.toString());
+                            
+                var addLocationIfItDoesNotExist = addLocationQuery.get()
+                    .then(doc => {
+                        // IF(The document doesnt exist, add it to the locations in the database)
+                        if (!doc.exists) {
+                            console.log(`No such document, adding '${locationToAdd}' to list of locations.`);
+                            assistant.ask(`[WEBHOOK] Okay, I will add ${locationToAdd} to your list of locations.`); // Tell user location has been added
+                            addLocationQuery.set({}); // add to database (this works)
+                        } 
+                        // ELSE(The location exists, tell the user that it exists)
+                        else {
+                            console.log(`Oops! '${locationToAdd}' exists in your list of locations. Data:`, doc.data());
+                            assistant.ask(`[WEBHOOK] Oops! ${locationToAdd} already exists in your list of locations.`); // tell user that the location already exists
+                        }
+                    })
+                    // Catch any errors
+                    .catch(err => {
+                        console.log('Error getting document', err);
+                    });
                 break;
 
             case ITEM_ADD:
@@ -244,7 +238,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 }
                 // ELSE (Location is specified where to store items)
                 else {
-                    speech = `[WEBHOOK] Okay, I will add ${itemsToAdd} to your ${locationToAddWithItem}.`;
+                    assistant.ask(`[WEBHOOK] Okay, I will add ${itemsToAdd} to your ${locationToAddWithItem}.`);
                     
                     var userDoc = db.collection('users').doc("JESSE_HARDCODE_TEST_ID");
 
@@ -293,7 +287,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     assistant.ask(`[WEBHOOK] Where would you like to set these items to expire?`);
                 }
                 else {
-                    speech = `[WEBHOOK] Okay, I will add an expiration date of ${expirationDateToAdd} to ${itemsToAddToExpiration} in your ${locationToAddWithItemExpirationDate}`;
+                    assistant.ask(`[WEBHOOK] Okay, I will add an expiration date of ${expirationDateToAdd} to ${itemsToAddToExpiration} in your ${locationToAddWithItemExpirationDate}`);
 
                     var userDoc = db.collection('users').doc("JESSE_HARDCODE_TEST_ID");
 
@@ -320,7 +314,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                 const itemToAddToCart = assistant.getArgument(ITEM_CONTEXT);
 
-                speech = `[WEBHOOK] Okay, I will add ${itemToAddToCart} to your cart.`;
+                assistant.ask(`[WEBHOOK] Okay, I will add ${itemToAddToCart} to your cart.`);
 
                 // Probably just want to set a flag, inCart set to true or false for this.
                 var userDoc = db.collection('users').doc("JESSE_HARDCODE_TEST_ID");
@@ -337,11 +331,9 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
             default:
                 console.log("adding default");
-                speech = 'Hmm, I was not able to add that expiration date. Can you try something like, set item to expire in 2 weeks?';
+                assistant.ask('Hmm, I was not able to add that expiration date. Can you try something like, set item to expire in 2 weeks?');
                 break;
         }
-        
-        assistant.ask(speech); // ask user something
     }
 
     /**
