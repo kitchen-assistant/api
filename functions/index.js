@@ -167,6 +167,17 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
         const permission = assistant.SupportedPermissions.NAME;
         assistant.askForPermission('[WEBHOOK] Welcome to Kitchen Assist. In order to use this app we need to know who you are', permission);
+
+        // assistant.askForSignIn(); // TODO - oAuth once we have it. then add a function like:
+
+        // function signInHandler (app) {
+        //     if (app.getSignInStatus() === app.SignInStatus.OK) {
+        //       let accessToken = app.getUser().accessToken;
+        //       // access account data with token
+        //     } else {
+        //       app.tell('You need to sign-in before using the app.');
+        //     }
+        //   }
     }
 
     /**
@@ -185,9 +196,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         const intent = assistant.getIntent(); // get the intent given by the user
         console.log('The user said: ' + assistant.getRawInput()); // Get what the user said 
 
-        console.log('Your USER ID is: ' + assistant.getUser().userId);
-        console.log('Your name is: ' + assistant.getUserName().displayName);
-
         // Set context
         console.log("setting add context");
         assistant.setContext(ADD_CONTEXT);
@@ -203,6 +211,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 const locationToAdd = assistant.getArgument(LOCATION_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
                 
                 // Query for adding location (can probably break this up more)
+                // eventually can use the actual ID here we get when we authenticate
                 var addLocationQuery = db.collection('users')
                                          .doc('JESSE_HARDCODE_TEST_ID')
                                          .collection('locations')
@@ -243,28 +252,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 }
                 // ELSE (Location is specified where to store items)
                 else {
-                    assistant.ask(`[WEBHOOK] Okay, I will add ${itemsToAdd} to your ${locationToAddWithItem}.`);
-                    
-                    var userDoc = db.collection('users').doc("JESSE_HARDCODE_TEST_ID");
-
-                    var data = {
-                        locations : {
-                            [locationToAddWithItem]: {
-                                [itemsToAdd] : {}
+                    var addItemQuery = db.collection('users')
+                                         .doc('JESSE_HARDCODE_TEST_ID')
+                                         .collection('locations')
+                                         .doc(locationToAddWithItem.toString())
+                                         .collection('items')
+                                         .doc(itemsToAdd.toString());
+                            
+                    var addItemIfItDoesNotExistInLocation = addItemQuery.get()
+                        .then(doc => {
+                            // IF(The document doesnt exist, add it to the locations in the database)
+                            if (!doc.exists) {
+                                console.log(`No such document, adding '${itemsToAdd}' to '${locationToAddWithItem}'`);
+                                assistant.ask(`[WEBHOOK] Okay, I will add ${itemsToAdd} to your ${locationToAddWithItem}.`);// Tell user location has been added
+                                addItemQuery.set({});
+                            } 
+                            // ELSE (The item exists in that location, tell the user that it exists)
+                            else {
+                                console.log(`Oops! '${itemsToAdd}' already exists in your ${locationToAddWithItem}`);
+                                assistant.ask(`Oops! '${itemsToAdd}' already exists in your ${locationToAddWithItem}`); // tell user that the location already exists
                             }
-                        }
-                    }
-
-                    var addItemsToLocationDoc = userDoc.set(data);
+                        })
+                        // Catch any errors
+                        .catch(err => {
+                            console.log('Error getting document', err);
+                    });
                 }
-
-                // TODO
-                // IF (The item doesn't exist in the location)
-                    // Tell user item has been added
-                    // TODO @ ZACH: Make API call to populate fields on the item
-                    // TODO @ ZACH: Query to add to database
-                // ELSE (item exists)
-                    // Tell user item exists already
                 break;
 
             case EXPIRATION_ADD:
