@@ -193,6 +193,15 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
      * @param {*} assistant 
      */
     function add(assistant) {
+
+        // Query is currently
+        // /locations/<location-name>/items/<item-name>/json-data (expiration)
+        
+        // NEED TO CHANGE TO and denormalize and account for redundancy
+        // /locations/<location-name>
+        // /items/<item-name>
+        // /cart/
+
         const intent = assistant.getIntent(); // get the intent given by the user
         console.log('The user said: ' + assistant.getRawInput()); // Get what the user said 
 
@@ -252,6 +261,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 }
                 // ELSE (Location is specified where to store items)
                 else {
+                    // TODO: Modify this query to add items to root level
                     var addItemQuery = db.collection('users')
                                          .doc('JESSE_HARDCODE_TEST_ID')
                                          .collection('locations')
@@ -309,7 +319,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                                             .doc(location.toString())
                                             .collection('items')
                                             .doc(item.toString());
-                            
+                           
+                    // TODO: Check if current expiration dates exist? Or just overwrite?
                     var addExpirationDateToItem = addExpirationQuery.get()
                         .then(doc => {
                                 assistant.ask(`[WEBHOOK] Okay, I will add an expiration date of ${expiration} to ${item} in your ${location}`);
@@ -331,18 +342,21 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 assistant.setContext(CART_CONTEXT);
                 assistant.setContext(ITEM_CONTEXT);
 
-                assistant.ask(`[WEBHOOK] Okay, I will add ${item} to your cart.`);
-
-                // Probably just want to set a flag, inCart set to true or false for this.
-                var userDoc = db.collection('users').doc("JESSE_HARDCODE_TEST_ID");
-
-                var data = {
-                    cart : {
-                        [item]: {}
-                    }
-                }
-
-                var addItemsToLocationDoc = userDoc.set(data);
+                var addToCartQuery = db.collection('users')
+                                       .doc('JESSE_HARDCODE_TEST_ID')
+                                       .collection('cart')
+                                       .doc(item.toString());
+                   
+                // TODO: Check if something in the cart exists & update query eventually
+                var addItemToCart = addToCartQuery.get()
+                    .then(doc => {
+                            assistant.ask(`[WEBHOOK] Okay, I will add ${item} to your cart.`);
+                            addToCartQuery.set({});
+                    })
+                    // Catch any errors
+                    .catch(err => {
+                        console.log('Error getting document', err);
+                });
 
                 break;
 
