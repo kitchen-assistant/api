@@ -258,6 +258,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                                          .doc(locationToAddWithItem.toString())
                                          .collection('items')
                                          .doc(itemsToAdd.toString());
+
+                    // TODO: Need to account for itemsToAdd as a list (array) and add that to the database
                             
                     var addItemIfItDoesNotExistInLocation = addItemQuery.get()
                         .then(doc => {
@@ -270,7 +272,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                             // ELSE (The item exists in that location, tell the user that it exists)
                             else {
                                 console.log(`Oops! '${itemsToAdd}' already exists in your ${locationToAddWithItem}`);
-                                assistant.ask(`Oops! '${itemsToAdd}' already exists in your ${locationToAddWithItem}`); // tell user that the location already exists
+                                assistant.ask(`[WEBHOOK] Oops! '${itemsToAdd}' already exists in your ${locationToAddWithItem}`); // tell user that the location already exists
                             }
                         })
                         // Catch any errors
@@ -305,22 +307,25 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     assistant.ask(`[WEBHOOK] Where would you like to set these items to expire?`);
                 }
                 else {
-                    assistant.ask(`[WEBHOOK] Okay, I will add an expiration date of ${expirationDateToAdd} to ${itemsToAddToExpiration} in your ${locationToAddWithItemExpirationDate}`);
-
-                    var userDoc = db.collection('users').doc("JESSE_HARDCODE_TEST_ID");
-
-                    var data = {
-                        locations : {
-                            [locationToAddWithItemExpirationDate]: {
-                                [itemsToAddToExpiration] : {
+                    var addExpirationQuery = db.collection('users')
+                                            .doc('JESSE_HARDCODE_TEST_ID')
+                                            .collection('locations')
+                                            .doc(locationToAddWithItemExpirationDate.toString())
+                                            .collection('items')
+                                            .doc(itemsToAddToExpiration.toString());
+                            
+                    var addExpirationDateToItem = addExpirationQuery.get()
+                        .then(doc => {
+                                assistant.ask(`[WEBHOOK] Okay, I will add an expiration date of ${expirationDateToAdd} to ${itemsToAddToExpiration} in your ${locationToAddWithItemExpirationDate}`);
+                                addExpirationQuery.set({
                                     'expiration-date': new Date(expirationDateToAdd)
-                                }
-                            }
-                        }
-                    }
-
-                    var addItemsToLocationDoc = userDoc.set(data);
-
+                                });
+                            
+                        })
+                        // Catch any errors
+                        .catch(err => {
+                            console.log('Error getting document', err);
+                    });
                 }
 
                 break;
