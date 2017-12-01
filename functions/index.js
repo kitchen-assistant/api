@@ -376,29 +376,46 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
         assistant.setContext(LIST_CONTEXT); // set list context
 
+        const item = assistant.getArgument(ITEM_CONTEXT);
+        const location = assistant.getArgument(LOCATION_CONTEXT); // locations --> fridge
+        const expiration = assistant.getArgument(DATE_CONTEXT);
+
         switch (intent) {
             case LOCATION_LIST:
                 console.log("listing locations and setting context");
                 assistant.setContext(LOCATION_CONTEXT);
-                
-                const locationToList = assistant.getArgument(LOCATION_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
 
                 // TODO: Make database call to get all the stored database locations
-                assistant.ask('[WEBHOOK] The locations that you have are <DB_CALL>.');
+
+                var listLocationQuery = db.collection('users')
+                                            .doc('JESSE_HARDCODE_TEST_ID')
+                                            .collection('locations');
+
+                var listAllLocations = listLocationQuery.get()
+                    .then(snapshot => {
+                        var listOfLocations = [];
+                        snapshot.forEach(doc => {
+                            console.log('Pushing to array: ' + doc.id, '=>', doc.data());
+                            listOfLocations.push(doc.id);
+                        });
+                        assistant.ask(`[WEBHOOK] The locations that you have are ${listOfLocations}.`);
+                    })
+                    .catch(err => {
+                        console.log('Error getting documents', err);
+                    });
+
                 break;
             
             case ITEM_LIST:
                 console.log("listing items and setting context");
                 assistant.setContext(ITEM_CONTEXT);
 
-                const itemsInLocationToList = assistant.getArgument(LOCATION_CONTEXT);
-
-                if(itemsInLocationToList == null) {
+                if(location == null) {
                     assistant.ask('Which location should I list your items?');
                 }
                 else {
                     // TODO: Make database call to get all the items in the given location and list the expiration dates on the items if they have one
-                    assistant.ask(`[WEBHOOK] The items that are in your ${itemsInLocationToList} are: <DB_CALL>`);
+                    assistant.ask(`[WEBHOOK] The items that are in your ${location} are: <DB_CALL>`);
                 }
 
                 break;
