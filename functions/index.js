@@ -321,13 +321,31 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                                             .doc(item.toString());
                            
                     // TODO: Check if current expiration dates exist? Or just overwrite?
-                    var addExpirationDateToItem = addExpirationQuery.get()
+
+                    // Query to add expiration to /locations/<location-name>/items/<item-name>/expiration-date: <date>
+                    var addExpirationDateToItemInLocations = addExpirationQuery.get()
                         .then(doc => {
-                                assistant.ask(`[WEBHOOK] Okay, I will add an expiration date of ${expiration} to ${item} in your ${location}`);
-                                addExpirationQuery.set({
-                                    'expiration-date': new Date(expiration)
-                                });
-                            
+                            assistant.ask(`[WEBHOOK] Okay, I will add an expiration date of ${expiration} to ${item} in your ${location}`);
+                            addExpirationQuery.set({
+                                'expiration-date': new Date(expiration)
+                            });
+                        })
+                        // Catch any errors
+                        .catch(err => {
+                            console.log('Error getting document', err);
+                    });
+
+                    // Query to add to root level /expiration/expiration-date: <date>
+                    var addExpirationQueryToRoot = db.collection('users')
+                                                    .doc('JESSE_HARDCODE_TEST_ID')
+                                                    .collection('expiration')
+                                                    .doc(item.toString());
+
+                    var addExpirationToRoot = addExpirationQueryToRoot.get()
+                        .then(doc => {
+                            addExpirationQueryToRoot.set({
+                                'expiration-date': new Date(expiration)
+                            })
                         })
                         // Catch any errors
                         .catch(err => {
@@ -442,7 +460,41 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 console.log("listing expiration dates and setting context");
                 assistant.setContext(EXPIRATION_CONTEXT);
 
-                assistant.ask('[WEBHOOK] The expiration dates that you have are <DB_CALL FOR ALL EXPIRATION DATES IN ALL LOCATIONS>');
+                var expirationQuery = db.collection('users')
+                                        .doc('JESSE_HARDCODE_TEST_ID')
+                                        .collection('expiration');
+
+                
+                // TODO: Also Add expiration to /locations/<location-name>/items/<item-name>/expiration : <date>
+
+                // Add expiration dates to the root /expiration
+                var listExpirationDates = expirationQuery.get()
+                    .then(snapshot => {
+                        var listOfExpirationDates = {}; 
+
+                        snapshot.forEach(doc => {
+                            console.log('Doc ID: ' + doc.id, ' | Doc Data:', doc.data());
+                            // console.log('trying to get at data ' + doc.data()['expiration-date']);
+                            listOfExpirationDates[doc.id] = doc.data()['expiration-date'];
+                        });
+
+                        // console.log(listOfExpirationDates);
+
+                        // thx https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries
+                        // var printOutExpiration = Object.entries(listOfExpirationDates).forEach(([key, value]) => {
+                        //     console.log(`${key} on ${value}, `); 
+                        //     // return `${key} on ${value}, `;
+                        // });
+
+                        // TODO: How to print this out nicely?
+
+                        assistant.ask('[WEBHOOK] You have an expiration dates of the following: ' 
+                                      + JSON.stringify(listOfExpirationDates));
+                    })
+                    .catch(err => {
+                        console.log('Error getting documents', err);
+                    });
+            
                 break;
 
             case CART_LIST:
