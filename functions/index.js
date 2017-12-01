@@ -380,12 +380,12 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         const location = assistant.getArgument(LOCATION_CONTEXT); // locations --> fridge
         const expiration = assistant.getArgument(DATE_CONTEXT);
 
+        // TODO: Eventullally list everything (all locations and all items)
+
         switch (intent) {
             case LOCATION_LIST:
                 console.log("listing locations and setting context");
                 assistant.setContext(LOCATION_CONTEXT);
-
-                // TODO: Make database call to get all the stored database locations
 
                 var listLocationQuery = db.collection('users')
                                             .doc('JESSE_HARDCODE_TEST_ID')
@@ -410,13 +410,31 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 console.log("listing items and setting context");
                 assistant.setContext(ITEM_CONTEXT);
 
+                // IF (User doesnt specify a location, get it from the user)
                 if(location == null) {
                     assistant.ask('Which location should I list your items?');
                 }
+                // ELSE (User specifies a location to get the items from)
                 else {
-                    // TODO: Make database call to get all the items in the given location and list the expiration dates on the items if they have one
-                    assistant.ask(`[WEBHOOK] The items that are in your ${location} are: <DB_CALL>`);
-                }
+                    var listItemQuery = db.collection('users')
+                                                .doc('JESSE_HARDCODE_TEST_ID')
+                                                .collection('locations')
+                                                .doc(location.toString())
+                                                .collection('items');
+
+                    var listItemsInALocation = listItemQuery.get()
+                        .then(snapshot => {
+                            var listOfItems = [];
+                            snapshot.forEach(doc => {
+                                console.log('Doc ID: ' + doc.id, ' | Doc Data:', doc.data());
+                                listOfItems.push(doc.id);
+                            });
+                            assistant.ask(`[WEBHOOK] The items that are in your ${location} are: ${listOfItems}`);
+                        })
+                        .catch(err => {
+                            console.log('Error getting documents', err);
+                        });
+                    }
 
                 break;
 
