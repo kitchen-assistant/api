@@ -501,7 +501,23 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 console.log("listing cart and setting context");
                 assistant.setContext(CART_CONTEXT);
 
-                assistant.ask('[WEBBOOK] The items that are in your cart are <DB_CALL>');
+                var listItemQuery = db.collection('users')
+                                        .doc('JESSE_HARDCODE_TEST_ID')
+                                        .collection('cart');
+
+                var listItemsInCart = listItemQuery.get()
+                    .then(snapshot => {
+                        var listOfItemsInCart = [];
+                        snapshot.forEach(doc => {
+                            console.log('Pushing to array: ' + doc.id, '=>', doc.data());
+                            listOfItemsInCart.push(doc.id);
+                        });
+                        assistant.ask(`[WEBHOOK] The locations that you have in your cart are ${listOfItemsInCart}.`);
+                    })
+                    .catch(err => {
+                        console.log('Error getting documents', err);
+                    });
+                    
                 break;
 
             default:
