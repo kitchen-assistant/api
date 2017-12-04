@@ -166,7 +166,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         assistant.setContext(REQUEST_PERMISSION_ACTION);
 
         const permission = assistant.SupportedPermissions.NAME;
-        assistant.askForPermission('[WEBHOOK] Welcome to Kitchen Assist. In order to use this app we need to know who you are', permission);
+        assistant.askForPermission('[WEBHOOK] Welcome to Kitchen Assist. You can add, list, update, or remove locations, items, expiration dates, or your cart. In order to use this app we need to know who you are', permission);
 
         // assistant.askForSignIn(); // TODO - oAuth once we have it. then add a function like:
 
@@ -536,20 +536,38 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
         assistant.setContext(REMOVE_CONTEXT);
 
+        const item = assistant.getArgument(ITEM_CONTEXT);
+        const location = assistant.getArgument(LOCATION_CONTEXT); // locations --> fridge
+        const expiration = assistant.getArgument(DATE_CONTEXT);
+
         switch (intent) {
             case LOCATION_REMOVE:
                 console.log("removing location and setting context");
                 assistant.setContext(LOCATION_CONTEXT);
 
-                const locationToRemove = assistant.getArgument(LOCATION_CONTEXT);
-
-                // IF (The location does not exist)
-                    // Tell user location does not exist
-                
-                // ELSE (location exists)
-                    // Tell user location has been deleted
-                    assistant.ask(`[WEBHOOK] I will remove ${locationToRemove} from your list of locations.`);
-                    // Query to delete item from DB
+                var removeLocationQuery = db.collection('users')
+                                         .doc('JESSE_HARDCODE_TEST_ID')
+                                         .collection('locations')
+                                         .doc(location.toString());
+                            
+                var removeTheLocation = removeLocationQuery.get()
+                    .then(doc => {
+                        // IF(The document doesnt exist, add it to the locations in the database)
+                        if (doc.exists) {
+                            console.log(`Doc exists. Removing from db.`);
+                            assistant.ask(`[WEBHOOK] Okay, I will remove ${location} from your list of locations.`); // Tell user location has been added
+                            removeLocationQuery.delete(); // remove item from the database
+                        } 
+                        // ELSE(The location exists, tell the user that it exists)
+                        else {
+                            console.log(`Oops! '${location}' exists in your list of locations. Data:`, doc.data());
+                            assistant.ask(`[WEBHOOK] Oops! ${location} does not exist in your list of locations.`); // tell user that the location already exists
+                        }
+                    })
+                    // Catch any errors
+                    .catch(err => {
+                        console.log('Error getting document', err);
+                    });
 
                 break;
             
