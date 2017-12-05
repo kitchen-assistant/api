@@ -1,3 +1,6 @@
+/**
+ * List of intents in dialogflow
+ */
 module.exports = Object.freeze({
     // Welcome and fallback intent
     WELCOME_INTENT : 'input.welcome',
