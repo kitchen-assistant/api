@@ -16,44 +16,18 @@ admin.initializeApp(functions.config().firebase); // init firebase app
 
 var db = admin.firestore(); // Database access using firestore
 
-// DIALOGFLOW INTENT NAMES
-// Welcome and fallback
-const WELCOME_INTENT = 'input.welcome';
-const DEFAULT_FALL_BACK_INTENT = 'input.unknown';
+const Actions = require('./constants');
+// const Actions = require('./constants/actions');
+// const Contexts = require('./constants/contexts');
 
-// Locations
-const LOCATION_ADD = 'location.add';
-const LOCATION_LIST = 'location.list';
-const LOCATION_REMOVE = 'location.remove';
-const LOCATION_UPDATE = 'location.update';
-
-// Items
-const ITEM_ADD = 'item.add';
-const ITEM_LIST = 'item.list';
-const ITEM_REMOVE = 'item.remove';
-const ITEM_UPDATE = 'item.update';
-
-// Expiration
-const EXPIRATION_ADD = 'expiration.add';
-const EXPIRATION_LIST = 'expiration.list';
-const EXPIRATION_REMOVE = 'expiration.remove';
-const EXPIRATION_UPDATE = 'expiration.update';
-
-// Cart / Shopping List 
-const CART_ADD = 'cart.add';
-const CART_LIST = 'cart.list';
-const CART_REMOVE = 'cart.remove';
-const CART_UPDATE = 'cart.update';
-const CART_PURCHASE = 'cart.purchase';
-
-// DIALOGFLOW CONTEXTS
+// // DIALOGFLOW CONTEXTS
 const ADD_CONTEXT = 'add';
 const LIST_CONTEXT = 'list';
 const REMOVE_CONTEXT = 'remove';
 const UPDATE_CONTEXT = 'update';
 const PURCHASE_CONTEXT = 'purchase';
 
-// DIALOGFLOW CONTEXT PARAMETERS (parameter --> value)
+// // DIALOGFLOW CONTEXT PARAMETERS (parameter --> value)
 const LOCATION_CONTEXT = 'locations';
 const ITEM_CONTEXT = 'items';
 
@@ -62,14 +36,10 @@ const DATE_CONTEXT = 'date';
 
 const CART_CONTEXT = 'cart';
 
-// Update context (same as above)
+// // Update context (same as above)
 const LOCATION_TO_UPDATE = 'locationToUpdate';
 const ITEM_TO_UPDATE = 'itemToUpdate';
 const ITEM_IN_CART_TO_UPDATE = 'cartItemToUpdate';
-
-// Permission stuff
-const REQUEST_PERMISSION_ACTION = 'permissions.request';
-const SAY_NAME_ACTION = 'permissions.sayname';
 
 // TODO: Create multiple cloud functions for each one of these functions? Or at least structure project properly
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
@@ -82,37 +52,37 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     let actionMap = new Map();
 
     // Welcome and fallback intents 
-    actionMap.set(WELCOME_INTENT, welcome);
-    actionMap.set(DEFAULT_FALL_BACK_INTENT, defaultFallback);
+    actionMap.set(Actions.WELCOME_INTENT, welcome);
+    actionMap.set(Actions.DEFAULT_FALL_BACK_INTENT, defaultFallback);
 
     // Locations
-    actionMap.set(LOCATION_ADD, add);
-    actionMap.set(LOCATION_LIST, list);
-    actionMap.set(LOCATION_REMOVE, remove);
-    actionMap.set(LOCATION_UPDATE, update);
+    actionMap.set(Actions.LOCATION_ADD, add);
+    actionMap.set(Actions.LOCATION_LIST, list);
+    actionMap.set(Actions.LOCATION_REMOVE, remove);
+    actionMap.set(Actions.LOCATION_UPDATE, update);
 
     // Items
-    actionMap.set(ITEM_ADD, add);
-    actionMap.set(ITEM_LIST, list);
-    actionMap.set(ITEM_REMOVE, remove);
-    actionMap.set(ITEM_UPDATE, update);
+    actionMap.set(Actions.ITEM_ADD, add);
+    actionMap.set(Actions.ITEM_LIST, list);
+    actionMap.set(Actions.ITEM_REMOVE, remove);
+    actionMap.set(Actions.ITEM_UPDATE, update);
 
     // Expiration Dates
-    actionMap.set(EXPIRATION_ADD, add);
-    actionMap.set(EXPIRATION_LIST, list);
-    actionMap.set(EXPIRATION_REMOVE, remove);
-    actionMap.set(EXPIRATION_UPDATE, update);
+    actionMap.set(Actions.EXPIRATION_ADD, add);
+    actionMap.set(Actions.EXPIRATION_LIST, list);
+    actionMap.set(Actions.EXPIRATION_REMOVE, remove);
+    actionMap.set(Actions.EXPIRATION_UPDATE, update);
 
     // Cart 
-    actionMap.set(CART_ADD, add);
-    actionMap.set(CART_LIST, list);
-    actionMap.set(CART_REMOVE, remove);
-    actionMap.set(CART_UPDATE, update);
-    actionMap.set(CART_PURCHASE, purchase);
+    actionMap.set(Actions.CART_ADD, add);
+    actionMap.set(Actions.CART_LIST, list);
+    actionMap.set(Actions.CART_REMOVE, remove);
+    actionMap.set(Actions.CART_UPDATE, update);
+    actionMap.set(Actions.CART_PURCHASE, purchase);
 
     // Permissions
-    actionMap.set(REQUEST_PERMISSION_ACTION, requestPermission);
-    actionMap.set(SAY_NAME_ACTION, sayName);
+    actionMap.set(Actions.REQUEST_PERMISSION_ACTION, requestPermission);
+    actionMap.set(Actions.SAY_NAME_ACTION, sayName);
     
     assistant.handleRequest(actionMap);
 
@@ -131,7 +101,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
      */
     function requestPermission(assistant) {
         console.log('CALLING REQUEST PERMISSION');
-        assistant.setContext(REQUEST_PERMISSION_ACTION);
+        assistant.setContext(Actions.REQUEST_PERMISSION_ACTION);
 
         const permission = assistant.SupportedPermissions.NAME;
         assistant.askForPermission('[WEBHOOK] To know who you are', permission);
@@ -143,7 +113,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
      */
     function sayName(assistant) {
         console.log("TRYING TO SAY NAME");
-        assistant.setContext(SAY_NAME_ACTION);
+        assistant.setContext(Actions.SAY_NAME_ACTION);
 
         // User granted permission
         if (assistant.isPermissionGranted()) {
@@ -163,7 +133,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
      */
     function welcome(assistant) {
         console.log('CALLING REQUEST PERMISSION');
-        assistant.setContext(REQUEST_PERMISSION_ACTION);
+        assistant.setContext(Actions.REQUEST_PERMISSION_ACTION);
 
         const permission = assistant.SupportedPermissions.NAME;
         assistant.askForPermission('[WEBHOOK] Welcome to Kitchen Assist. You can add, list, update, or remove locations, items, expiration dates, or your cart. In order to use this app we need to know who you are', permission);
@@ -216,7 +186,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
         // SWITCH (The intent from the user)
         switch (intent) {
-            case LOCATION_ADD:
+            case Actions.LOCATION_ADD:
                 console.log("adding location and setting location context");
                 assistant.setContext(LOCATION_CONTEXT);
 
@@ -249,7 +219,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     });
                 break;
 
-            case ITEM_ADD:
+            case Actions.ITEM_ADD:
                 console.log("adding item and setting item context");
                 assistant.setContext(ITEM_CONTEXT);
 
@@ -292,7 +262,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 }
                 break;
 
-            case EXPIRATION_ADD:
+            case Actions.EXPIRATION_ADD:
                 console.log("adding expiration");
                 assistant.setContext(EXPIRATION_CONTEXT); 
                 assistant.setContext(ITEM_CONTEXT); // not sure if we need to set these.. still don't really know what setting context does
@@ -355,7 +325,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                 break;
 
-            case CART_ADD:
+            case Actions.CART_ADD:
                 console.log("adding to cart");
                 assistant.setContext(CART_CONTEXT);
                 assistant.setContext(ITEM_CONTEXT);
@@ -401,7 +371,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         // TODO: Eventullally list everything (all locations and all items)
 
         switch (intent) {
-            case LOCATION_LIST:
+            case Actions.LOCATION_LIST:
                 console.log("listing locations and setting context");
                 assistant.setContext(LOCATION_CONTEXT);
 
@@ -424,7 +394,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                 break;
             
-            case ITEM_LIST:
+            case Actions.ITEM_LIST:
                 console.log("listing items and setting context");
                 assistant.setContext(ITEM_CONTEXT);
 
@@ -456,7 +426,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                 break;
 
-            case EXPIRATION_LIST:
+            case Actions.EXPIRATION_LIST:
                 console.log("listing expiration dates and setting context");
                 assistant.setContext(EXPIRATION_CONTEXT);
 
@@ -497,7 +467,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             
                 break;
 
-            case CART_LIST:
+            case Actions.CART_LIST:
                 console.log("listing cart and setting context");
                 assistant.setContext(CART_CONTEXT);
 
@@ -541,7 +511,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         const expiration = assistant.getArgument(DATE_CONTEXT);
 
         switch (intent) {
-            case LOCATION_REMOVE:
+            case Actions.LOCATION_REMOVE:
                 console.log("removing location and setting context");
                 assistant.setContext(LOCATION_CONTEXT);
 
@@ -571,7 +541,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                 break;
             
-            case ITEM_REMOVE:
+            case Actions.ITEM_REMOVE:
                 console.log("removing item and setting context");
                 assistant.setContext(ITEM_CONTEXT);
 
@@ -592,7 +562,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                 break;
 
-            case EXPIRATION_REMOVE:
+            case Actions.EXPIRATION_REMOVE:
                 console.log("removing expiration and setting context");
                 assistant.setContext(EXPIRATION_CONTEXT);
 
@@ -613,7 +583,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                 break;
 
-            case CART_REMOVE:
+            case Actions.CART_REMOVE:
                 console.log("removing from cart and setting context");
                 assistant.setContext(CART_CONTEXT);
 
@@ -644,7 +614,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         assistant.setContext(UPDATE_CONTEXT);
 
         switch (intent) {
-            case LOCATION_UPDATE:
+            case Actions.LOCATION_UPDATE:
                 console.log("updating location and setting context");
                 assistant.setContext(LOCATION_CONTEXT);
 
@@ -665,7 +635,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 }
                 break;
             
-            case ITEM_UPDATE:
+            case Actions.ITEM_UPDATE:
                 console.log("updating item and setting context");
                 assistant.setContext(ITEM_CONTEXT);
 
@@ -690,7 +660,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 }
                 break;
 
-            case EXPIRATION_UPDATE:
+            case Actions.EXPIRATION_UPDATE:
                 console.log("updating expiration date and setting context");
                 assistant.setContext(EXPIRATION_CONTEXT);
                 assistant.setContext(ITEM_CONTEXT); // not sure if we need to set these.. still don't really know what setting context does
@@ -716,7 +686,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                 break;
 
-            case CART_UPDATE:
+            case Actions.CART_UPDATE:
                 console.log("updating cart and setting context");
                 assistant.setContext(CART_CONTEXT);
 
