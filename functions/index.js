@@ -16,29 +16,13 @@ admin.initializeApp(functions.config().firebase); // init firebase app
 
 var db = admin.firestore(); // Database access using firestore
 
-const Intents = require('./constants');
-// const Intents = require('./constants/Intents');
-// const Contexts = require('./constants/contexts');
+const Intents = require('./intents');
 
 // // DIALOGFLOW CONTEXTS
-const ADD_CONTEXT = 'add';
-const LIST_CONTEXT = 'list';
-const REMOVE_CONTEXT = 'remove';
-const UPDATE_CONTEXT = 'update';
-const PURCHASE_CONTEXT = 'purchase';
+const Contexts = require('./contexts');
 
-// // DIALOGFLOW CONTEXT PARAMETERS (parameter --> value)
-const LOCATION_CONTEXT = 'locations';
-const ITEM_CONTEXT = 'items';
-const EXPIRATION_CONTEXT = 'expire';
-const DATE_CONTEXT = 'date';
+// const add = require('./add');
 
-const CART_CONTEXT = 'cart';
-
-// // Update context (same as above)
-const LOCATION_TO_UPDATE = 'locationToUpdate';
-const ITEM_TO_UPDATE = 'itemToUpdate';
-const ITEM_IN_CART_TO_UPDATE = 'cartItemToUpdate';
 
 // TODO: Create multiple cloud functions for each one of these functions? Or at least structure project properly
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
@@ -165,7 +149,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
         // Query is currently
         // /locations/<location-name>/items/<item-name>/json-data (expiration)
-        
+
         // NEED TO CHANGE TO and denormalize and account for redundancy
         // /locations/<location-name>
         // /items/<item-name>
@@ -176,28 +160,28 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
         // Set context
         console.log("setting add context");
-        assistant.setContext(ADD_CONTEXT);
+        assistant.setContext(Contexts.ADD_CONTEXT);
 
-         // extract the parameter values - parameter --> value
-        const item = assistant.getArgument(ITEM_CONTEXT);
-        const location = assistant.getArgument(LOCATION_CONTEXT); // locations --> fridge
-        const expiration = assistant.getArgument(DATE_CONTEXT);
+        // extract the parameter values - parameter --> value
+        const item = assistant.getArgument(Contexts.ITEM_CONTEXT);
+        const location = assistant.getArgument(Contexts.LOCATION_CONTEXT); // locations --> fridge
+        const expiration = assistant.getArgument(Contexts.DATE_CONTEXT);
 
         // SWITCH (The intent from the user)
         switch (intent) {
             case Intents.LOCATION_ADD:
                 console.log("adding location and setting location context");
-                assistant.setContext(LOCATION_CONTEXT);
+                assistant.setContext(Contexts.LOCATION_CONTEXT);
 
-                // console.log(JSON.stringify(assistant.getContext(LOCATION_CONTEXT).parameters, null, 4)); // for debugging
-                
+                // console.log(JSON.stringify(assistant.getContext(Contexts.LOCATION_CONTEXT).parameters, null, 4)); // for debugging
+
                 // Query for adding location (can probably break this up more)
                 // eventually can use the actual ID here we get when we authenticate
                 var addLocationQuery = db.collection('users')
-                                         .doc('JESSE_HARDCODE_TEST_ID')
-                                         .collection('locations')
-                                         .doc(location.toString());
-                            
+                    .doc('JESSE_HARDCODE_TEST_ID')
+                    .collection('locations')
+                    .doc(location.toString());
+
                 var addLocationIfItDoesNotExist = addLocationQuery.get()
                     .then(doc => {
                         // IF(The document doesnt exist, add it to the locations in the database)
@@ -205,7 +189,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                             console.log(`No such document, adding '${location}' to list of locations.`);
                             assistant.ask(`[WEBHOOK] Okay, I will add ${location} to your list of locations.`); // Tell user location has been added
                             addLocationQuery.set({}); // add to database (this works)
-                        } 
+                        }
                         // ELSE(The location exists, tell the user that it exists)
                         else {
                             console.log(`Oops! '${location}' exists in your list of locations. Data:`, doc.data());
@@ -220,7 +204,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
             case Intents.ITEM_ADD:
                 console.log("adding item and setting item context");
-                assistant.setContext(ITEM_CONTEXT);
+                assistant.setContext(Contexts.ITEM_CONTEXT);
 
                 console.log(`Item to add ${item}; Location to add: ${location}`);
 
@@ -232,14 +216,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 else {
                     // TODO: Modify this query to add items to root level
                     var addItemQuery = db.collection('users')
-                                         .doc('JESSE_HARDCODE_TEST_ID')
-                                         .collection('locations')
-                                         .doc(location.toString())
-                                         .collection('items')
-                                         .doc(item.toString());
+                        .doc('JESSE_HARDCODE_TEST_ID')
+                        .collection('locations')
+                        .doc(location.toString())
+                        .collection('items')
+                        .doc(item.toString());
 
                     // TODO: Need to account for item as a list (array) and add that to the database
-                            
+
                     var addItemIfItDoesNotExistInLocation = addItemQuery.get()
                         .then(doc => {
                             // IF(The document doesnt exist, add it to the locations in the database)
@@ -247,7 +231,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                                 console.log(`No such document, adding '${item}' to '${location}'`);
                                 assistant.ask(`[WEBHOOK] Okay, I will add ${item} to your ${location}.`);// Tell user location has been added
                                 addItemQuery.set({});
-                            } 
+                            }
                             // ELSE (The item exists in that location, tell the user that it exists)
                             else {
                                 console.log(`Oops! '${item}' already exists in your ${location}`);
@@ -257,38 +241,38 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         // Catch any errors
                         .catch(err => {
                             console.log('Error getting document', err);
-                    });
+                        });
                 }
                 break;
 
             case Intents.EXPIRATION_ADD:
                 console.log("adding expiration");
-                assistant.setContext(EXPIRATION_CONTEXT); 
-                assistant.setContext(ITEM_CONTEXT); // not sure if we need to set these.. still don't really know what setting context does
-                assistant.setContext(DATE_CONTEXT); // not sure if we need this either
+                assistant.setContext(Contexts.EXPIRATION_CONTEXT);
+                assistant.setContext(Contexts.ITEM_CONTEXT); // not sure if we need to set these.. still don't really know what setting context does
+                assistant.setContext(Contexts.DATE_CONTEXT); // not sure if we need this either
 
                 console.log(`Expiration to add: ${expiration}; Items to add: ${item}`);
 
-                if(expiration == null && item == null) {
+                if (expiration == null && item == null) {
                     assistant.ask(`[WEBHOOK] What item would you like to set to expire?`);
                 }
-                else if(expiration == null) {
+                else if (expiration == null) {
                     assistant.ask(`[WEBHOOK] What expiration date would you like to set on ${item}? Try saying it like MM-DD-YYYY`);
                 }
-                else if(item == null) {
+                else if (item == null) {
                     assistant.ask(`[WEBHOOK] What item would you like to set the expiration date of ${expiration}`);
                 }
-                else if(location == null) {
+                else if (location == null) {
                     assistant.ask(`[WEBHOOK] Where would you like to set these items to expire?`);
                 }
                 else {
                     var addExpirationQuery = db.collection('users')
-                                            .doc('JESSE_HARDCODE_TEST_ID')
-                                            .collection('locations')
-                                            .doc(location.toString())
-                                            .collection('items')
-                                            .doc(item.toString());
-                           
+                        .doc('JESSE_HARDCODE_TEST_ID')
+                        .collection('locations')
+                        .doc(location.toString())
+                        .collection('items')
+                        .doc(item.toString());
+
                     // TODO: Check if current expiration dates exist? Or just overwrite?
 
                     // Query to add expiration to /locations/<location-name>/items/<item-name>/expiration-date: <date>
@@ -302,13 +286,13 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         // Catch any errors
                         .catch(err => {
                             console.log('Error getting document', err);
-                    });
+                        });
 
                     // Query to add to root level /expiration/expiration-date: <date>
                     var addExpirationQueryToRoot = db.collection('users')
-                                                    .doc('JESSE_HARDCODE_TEST_ID')
-                                                    .collection('expiration')
-                                                    .doc(item.toString());
+                        .doc('JESSE_HARDCODE_TEST_ID')
+                        .collection('expiration')
+                        .doc(item.toString());
 
                     var addExpirationToRoot = addExpirationQueryToRoot.get()
                         .then(doc => {
@@ -319,31 +303,31 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         // Catch any errors
                         .catch(err => {
                             console.log('Error getting document', err);
-                    });
+                        });
                 }
 
                 break;
 
             case Intents.CART_ADD:
                 console.log("adding to cart");
-                assistant.setContext(CART_CONTEXT);
-                assistant.setContext(ITEM_CONTEXT);
+                assistant.setContext(Contexts.CART_CONTEXT);
+                assistant.setContext(Contexts.ITEM_CONTEXT);
 
                 var addToCartQuery = db.collection('users')
-                                       .doc('JESSE_HARDCODE_TEST_ID')
-                                       .collection('cart')
-                                       .doc(item.toString());
-                   
+                    .doc('JESSE_HARDCODE_TEST_ID')
+                    .collection('cart')
+                    .doc(item.toString());
+
                 // TODO: Check if something in the cart exists & update query eventually
                 var addItemToCart = addToCartQuery.get()
                     .then(doc => {
-                            assistant.ask(`[WEBHOOK] Okay, I will add ${item} to your cart.`);
-                            addToCartQuery.set({});
+                        assistant.ask(`[WEBHOOK] Okay, I will add ${item} to your cart.`);
+                        addToCartQuery.set({});
                     })
                     // Catch any errors
                     .catch(err => {
                         console.log('Error getting document', err);
-                });
+                    });
 
                 break;
 
@@ -361,18 +345,18 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         const intent = assistant.getIntent(); // get the intent given by the user
         console.log("list");
 
-        assistant.setContext(LIST_CONTEXT); // set list context
+        assistant.setContext(Contexts.LIST_CONTEXT); // set list context
 
-        const item = assistant.getArgument(ITEM_CONTEXT);
-        const location = assistant.getArgument(LOCATION_CONTEXT); // locations --> fridge
-        const expiration = assistant.getArgument(DATE_CONTEXT);
+        const item = assistant.getArgument(Contexts.ITEM_CONTEXT);
+        const location = assistant.getArgument(Contexts.LOCATION_CONTEXT); // locations --> fridge
+        const expiration = assistant.getArgument(Contexts.DATE_CONTEXT);
 
         // TODO: Eventullally list everything (all locations and all items)
 
         switch (intent) {
             case Intents.LOCATION_LIST:
                 console.log("listing locations and setting context");
-                assistant.setContext(LOCATION_CONTEXT);
+                assistant.setContext(Contexts.LOCATION_CONTEXT);
 
                 var listLocationQuery = db.collection('users')
                                             .doc('JESSE_HARDCODE_TEST_ID')
@@ -395,7 +379,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             
             case Intents.ITEM_LIST:
                 console.log("listing items and setting context");
-                assistant.setContext(ITEM_CONTEXT);
+                assistant.setContext(Contexts.ITEM_CONTEXT);
 
                 // IF (User doesnt specify a location, get it from the user)
                 if(location == null) {
@@ -427,7 +411,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
             case Intents.EXPIRATION_LIST:
                 console.log("listing expiration dates and setting context");
-                assistant.setContext(EXPIRATION_CONTEXT);
+                assistant.setContext(Contexts.EXPIRATION_CONTEXT);
 
                 var expirationQuery = db.collection('users')
                                         .doc('JESSE_HARDCODE_TEST_ID')
@@ -468,7 +452,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
             case Intents.CART_LIST:
                 console.log("listing cart and setting context");
-                assistant.setContext(CART_CONTEXT);
+                assistant.setContext(Contexts.CART_CONTEXT);
 
                 var listItemQuery = db.collection('users')
                                         .doc('JESSE_HARDCODE_TEST_ID')
@@ -503,16 +487,16 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         const intent = assistant.getIntent(); // get the intent given by the user
         console.log("remove");
 
-        assistant.setContext(REMOVE_CONTEXT);
+        assistant.setContext(Contexts.REMOVE_CONTEXT);
 
-        const item = assistant.getArgument(ITEM_CONTEXT);
-        const location = assistant.getArgument(LOCATION_CONTEXT); // locations --> fridge
-        const expiration = assistant.getArgument(DATE_CONTEXT);
+        const item = assistant.getArgument(Contexts.ITEM_CONTEXT);
+        const location = assistant.getArgument(Contexts.LOCATION_CONTEXT); // locations --> fridge
+        const expiration = assistant.getArgument(Contexts.DATE_CONTEXT);
 
         switch (intent) {
             case Intents.LOCATION_REMOVE:
                 console.log("removing location and setting context");
-                assistant.setContext(LOCATION_CONTEXT);
+                assistant.setContext(Contexts.LOCATION_CONTEXT);
 
                 var removeLocationQuery = db.collection('users')
                                          .doc('JESSE_HARDCODE_TEST_ID')
@@ -542,10 +526,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             
             case Intents.ITEM_REMOVE:
                 console.log("removing item and setting context");
-                assistant.setContext(ITEM_CONTEXT);
+                assistant.setContext(Contexts.ITEM_CONTEXT);
 
-                const locationWithItemToRemove = assistant.getArgument(LOCATION_CONTEXT);
-                const itemToRemove = assistant.getArgument(ITEM_CONTEXT);
+                const locationWithItemToRemove = assistant.getArgument(Contexts.LOCATION_CONTEXT);
+                const itemToRemove = assistant.getArgument(Contexts.ITEM_CONTEXT);
 
                 if(locationWithItemToRemove == null) {
                     assistant.ask(`[WEBHOOK] Which location should I remove ${itemToRemove} from?`);
@@ -563,10 +547,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
             case Intents.EXPIRATION_REMOVE:
                 console.log("removing expiration and setting context");
-                assistant.setContext(EXPIRATION_CONTEXT);
+                assistant.setContext(Contexts.EXPIRATION_CONTEXT);
 
-                const locationWithItemToRemoveExpirationDate = assistant.getArgument(LOCATION_CONTEXT);
-                const itemToRemoveExpirationDate = assistant.getArgument(ITEM_CONTEXT);
+                const locationWithItemToRemoveExpirationDate = assistant.getArgument(Contexts.LOCATION_CONTEXT);
+                const itemToRemoveExpirationDate = assistant.getArgument(Contexts.ITEM_CONTEXT);
 
                 if(locationWithItemToRemoveExpirationDate == null) {
                     assistant.ask(`[WEBHOOK] Which location should I remove the expiration date of ${itemToRemoveExpirationDate} from?`);
@@ -584,9 +568,9 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
             case Intents.CART_REMOVE:
                 console.log("removing from cart and setting context");
-                assistant.setContext(CART_CONTEXT);
+                assistant.setContext(Contexts.CART_CONTEXT);
 
-                const itemToRemoveFromCart = assistant.getArgument(ITEM_CONTEXT);
+                const itemToRemoveFromCart = assistant.getArgument(Contexts.ITEM_CONTEXT);
 
                 // IF (The item in specific does not exist in the cart)
                     // Tell user the item in the location does not exist
@@ -610,15 +594,15 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         const intent = assistant.getIntent(); // get the intent given by the user
         console.log("update");
 
-        assistant.setContext(UPDATE_CONTEXT);
+        assistant.setContext(Contexts.UPContexts.DATE_CONTEXT);
 
         switch (intent) {
             case Intents.LOCATION_UPDATE:
                 console.log("updating location and setting context");
-                assistant.setContext(LOCATION_CONTEXT);
+                assistant.setContext(Contexts.LOCATION_CONTEXT);
 
-                const locationToUpdate = assistant.getArgument(LOCATION_CONTEXT);
-                const locationToUpdateTo = assistant.getArgument(LOCATION_TO_UPDATE);
+                const locationToUpdate = assistant.getArgument(Contexts.LOCATION_CONTEXT);
+                const locationToUpdateTo = assistant.getArgument(Contexts.LOCATION_TO_UPDATE);
 
                 if(locationToUpdateTo == null) {
                     assistant.ask(`[WEBHOOK] What should I update the name of ${locationToUpdate} to?`);
@@ -636,11 +620,11 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             
             case Intents.ITEM_UPDATE:
                 console.log("updating item and setting context");
-                assistant.setContext(ITEM_CONTEXT);
+                assistant.setContext(Contexts.ITEM_CONTEXT);
 
-                const locationToUpdateItem = assistant.getArgument(LOCATION_CONTEXT);
-                const itemToUpdate = assistant.getArgument(ITEM_CONTEXT);
-                const itemToUpdateTo = assistant.getArgument(ITEM_TO_UPDATE);
+                const locationToUpdateItem = assistant.getArgument(Contexts.LOCATION_CONTEXT);
+                const itemToUpdate = assistant.getArgument(Contexts.ITEM_CONTEXT);
+                const itemToUpdateTo = assistant.getArgument(Contexts.ITEM_TO_UPDATE);
 
                 if(itemToUpdateTo == null) {
                     assistant.ask(`[WEBHOOK] What should I update the name of ${itemToUpdate} to?`);
@@ -661,12 +645,12 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
             case Intents.EXPIRATION_UPDATE:
                 console.log("updating expiration date and setting context");
-                assistant.setContext(EXPIRATION_CONTEXT);
-                assistant.setContext(ITEM_CONTEXT); // not sure if we need to set these.. still don't really know what setting context does
-                assistant.setContext(DATE_CONTEXT); // not sure if we need this either
+                assistant.setContext(Contexts.EXPIRATION_CONTEXT);
+                assistant.setContext(Contexts.ITEM_CONTEXT); // not sure if we need to set these.. still don't really know what setting context does
+                assistant.setContext(Contexts.DATE_CONTEXT); // not sure if we need this either
 
-                const expirationDateToUpdate = assistant.getArgument(DATE_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
-                const itemsToUpdateToExpiration = assistant.getArgument(ITEM_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
+                const expirationDateToUpdate = assistant.getArgument(Contexts.DATE_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
+                const itemsToUpdateToExpiration = assistant.getArgument(Contexts.ITEM_CONTEXT); // extract the parameter values; i.e. parameter --> value; locations --> fridge
 
                 console.log(`Expiration to add: ${expirationDateToUpdate}; Items to add: ${itemsToUpdateToExpiration}`);
 
@@ -687,10 +671,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
             case Intents.CART_UPDATE:
                 console.log("updating cart and setting context");
-                assistant.setContext(CART_CONTEXT);
+                assistant.setContext(Contexts.CART_CONTEXT);
 
-                const itemToUpdateInCart = assistant.getArgument(ITEM_CONTEXT);
-                const itemToUpdateInCartTo = assistant.getArgument(ITEM_IN_CART_TO_UPDATE);
+                const itemToUpdateInCart = assistant.getArgument(Contexts.ITEM_CONTEXT);
+                const itemToUpdateInCartTo = assistant.getArgument(Contexts.ITEM_IN_CART_TO_UPDATE);
 
                 if(itemToUpdateInCart == null) {
                     assistant.ask(`[WEBHOOK] What should I update your cart item to?`);
@@ -723,7 +707,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         const intent = assistant.getIntent(); // get the intent given by the user
         console.log("purchase");
 
-        assistant.setContext(PURCHASE_CONTEXT);
+        assistant.setContext(Contexts.PURCHASE_CONTEXT);
 
         // TODO @ Zach: Connect to Google transactions API
         
